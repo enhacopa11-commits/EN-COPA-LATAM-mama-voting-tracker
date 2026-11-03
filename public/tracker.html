@@ -117,7 +117,7 @@
         <div>
          <label data-template-id="screenshots-label" class="canva-text mb-2 block text-xs font-bold tracking-widest" for="screenshots" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">VOTING CERTIFICATE SCREENSHOTS</label>
          <div id="drop-zone" class="drop p-6 text-center"><input id="screenshots" type="file" accept="image/png,image/jpeg,image/webp" multiple="" class="sr-only"> <label for="screenshots" class="inline-block cursor-pointer rounded-xl border border-[#6686a0] bg-[#24354b] px-5 py-3 font-bold hover:bg-[#344c68]">Choose screenshots</label>
-          <p id="drop-help" class="muted mt-3 text-sm">PNG, JPG or WebP · Up to 5 MB per original image · Multiple files</p>
+          <p id="drop-help" class="muted mt-3 text-sm">Select multiple screenshots. No fixed batch-count limit. Maximum 5 MB per original image. Screenshots are automatically compressed before upload when possible. Large batches may take longer. The participation date must be visible on each certificate. English, Japanese, Korean, Simplified Chinese, and Traditional Chinese participation-date labels are supported.</p>
          </div>
          <div id="preview-list" class="mt-4 flex flex-wrap gap-3" aria-label="Selected screenshots"></div>
         </div>
@@ -350,69 +350,71 @@
   function addFiles(list){let issue="";for(const file of list){if(!mime.includes(file.type)){issue=translations[lang].type;continue}if(file.size>5*1024*1024){issue=translations[lang].size;continue}files.push({id:crypto.randomUUID(),file,url:URL.createObjectURL(file)})}renderFiles();if(issue){status("error");message(issue,true)}else if(files.length){status("available");message("")}}
   $("screenshots").addEventListener("change",e=>{addFiles([...e.target.files]);e.target.value=""});
   const drop=$("drop-zone");drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("dragging")});drop.addEventListener("dragleave",()=>drop.classList.remove("dragging"));drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("dragging");addFiles([...e.dataTransfer.files])});
+  async function compressScreenshot(file){
+    try{
+      const bitmap=await createImageBitmap(file);
+      const scale=Math.min(1,2200/Math.max(bitmap.width,bitmap.height));
+      const canvas=document.createElement("canvas");
+      canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+      canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+      const context=canvas.getContext("2d");
+      if(!context){bitmap.close();return file}
+      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      bitmap.close();
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.86));
+      if(!blob||blob.size>=file.size)return file;
+      return new File([blob],file.name.replace(/\.(png|webp)$/i,".jpg"),{type:"image/jpeg",lastModified:Date.now()});
+    }catch(error){console.warn("Screenshot compression skipped:",error);return file}
+  }
+
   $("proof-form").addEventListener("submit", async e => {
     e.preventDefault();
-    if (busy) return;
-
-    const username = $("username").value.trim();
-    if (!/^@?[A-Za-z0-9_]{1,15}$/.test(username) || !selectedCountry || !files.length) {
-      status("error");
-      message(translations[lang].missing, true);
-      return;
+    if(busy)return;
+    const username=$("username").value.trim();
+    if(!/^@?[A-Za-z0-9_]{1,15}$/.test(username)||!selectedCountry||!files.length){
+      status("error");message(translations[lang].missing,true);return;
     }
-
-    if (files.length > 5) {
-      status("error");
-      message("You can submit up to 5 images at a time.", true);
-      return;
-    }
-
-    busy = true;
-    $("submit-button").disabled = true;
-    $("screenshots").disabled = true;
+    busy=true;
+    $("submit-button").disabled=true;
+    $("screenshots").disabled=true;
     status("processing");
-    message("Uploading images and reading certificates...");
+    const total=files.length,results=[];
     renderFiles();
-
-    try {
-      const body = new FormData();
-      body.append("username", username);
-      body.append("countryCode", selectedCountry);
-      files.forEach(item => body.append("screenshots", item.file));
-
-      const response = await fetch("/api/submissions", {
-        method: "POST",
-        body
-      });
-
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Submission failed.");
-
-      const accepted = payload.results.filter(x => x.status === "verified").length;
-      const rejected = payload.results.length - accepted;
-      const details = payload.results.map(x =>
-        `${x.filename}: ${x.message}`
-      ).join("\n");
-
-      message(
-        `Received ${payload.results.length} image(s). ${accepted} provisionally counted; ${rejected} not counted.\n${details}`
-      );
-      status(accepted > 0 ? "success" : "error");
-
-      files.forEach(item => URL.revokeObjectURL(item.url));
-      files = [];
+    try{
+      for(let index=0;index<total;index++){
+        const item=files[index];
+        message(`Preparing and uploading screenshot ${index+1} of ${total}...`);
+        const uploadFile=await compressScreenshot(item.file);
+        const body=new FormData();
+        body.append("username",username);
+        body.append("countryCode",selectedCountry);
+        body.append("screenshots",uploadFile,uploadFile.name);
+        try{
+          const response=await fetch("/api/submissions",{method:"POST",body});
+          const payload=await response.json();
+          if(!response.ok)throw new Error(payload.error||"Submission failed.");
+          results.push(...(payload.results||[]));
+        }catch(error){
+          results.push({filename:item.file.name,status:"rejected",message:error instanceof Error?error.message:"Upload failed."});
+        }
+      }
+      const accepted=results.filter(x=>x.status==="verified").length;
+      const details=results.map(x=>`${x.filename}: ${x.message}`).join("\n");
+      message(`Processed ${results.length} of ${total} image(s). ${accepted} provisionally counted; ${results.length-accepted} not counted.\n${details}`);
+      status(accepted>0?"success":"error");
+      files.forEach(item=>URL.revokeObjectURL(item.url));
+      files=[];
       renderFiles();
       $("proof-form").reset();
-      selectedCountry = "";
+      selectedCountry="";
       await loadRankings();
       await loadCollabMission();
-    } catch (error) {
-      status("error");
-      message(error instanceof Error ? error.message : "Submission failed.", true);
-    } finally {
-      busy = false;
-      $("submit-button").disabled = false;
-      $("screenshots").disabled = false;
+    }catch(error){
+      status("error");message(error instanceof Error?error.message:"Submission failed.",true);
+    }finally{
+      busy=false;
+      $("submit-button").disabled=false;
+      $("screenshots").disabled=false;
       renderFiles();
     }
   });
