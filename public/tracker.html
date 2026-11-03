@@ -109,9 +109,9 @@
          <div>
           <label data-template-id="username-label" class="canva-text mb-2 block text-xs font-bold tracking-widest" for="username" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">X USERNAME</label><input data-template-id="username-input" class="canva-input field" id="username" name="username" maxlength="30" autocomplete="off" placeholder="@yourusername" style="background: rgb(17, 28, 44); color: rgb(255, 255, 255); font-weight: 400; font-style: normal; font-size: 16px;">
          </div>
-         <div class="relative" id="country-combobox">
-          <label data-template-id="country-label" class="canva-text mb-2 block text-xs font-bold tracking-widest" for="country-search" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">COUNTRY</label><input id="country-search" class="field" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="country-list" autocomplete="off" placeholder="Search for a country…" aria-label="Search and select one country">
-          <div id="country-list" role="listbox" class="absolute z-20 mt-1 hidden max-h-60 w-full overflow-y-auto rounded-xl border border-[#56728f] bg-[#122033] p-1 shadow-2xl"></div>
+         <div>
+          <label data-template-id="country-label" class="canva-text mb-2 block text-xs font-bold tracking-widest" for="country-search" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">COUNTRY</label>
+          <select id="country-search" class="field" aria-label="Select your country"><option value="">Select your country…</option></select>
          </div>
         </div>
         <div>
@@ -283,80 +283,17 @@
     pt:{nav:["Enviar comprovante","Desafio diário","Rankings"],search:"Buscar um país…",choose:"Escolher capturas",files:n=>`${n} imagem(ns) selecionada(s)`,available:"● Available",processing:"Processing",success:"Successfully submitted",error:"Error",missing:"Informe seu usuário do X, selecione um país e adicione ao menos uma imagem.",size:"Cada imagem original deve ter no máximo 5 MB.",type:"Apenas imagens PNG, JPG ou WebP são aceitas.",demo:""}
   };
   let lang="es",selectedCountry="",files=[],busy=false,formState="available";
-  const codes=("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(" ");
-  const display = () => new Intl.DisplayNames(["en"], { type: "region" });
-
-  const countryName = code => {
-    try {
-      return display().of(code) || code;
-    } catch {
-      return code;
-    }
-  };
-
-  const countryList = $("country-list");
+  const codes=("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RW SA SB SC SD SE SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(" ");
   const countryInput = $("country-search");
-  // Render the menu at document level so no card, grid, or section can clip it.
-  document.body.append(countryList);
-  Object.assign(countryList.style, {
-    position: "fixed",
-    zIndex: "99999",
-    maxHeight: "min(15rem, 45vh)",
-    overflowY: "auto"
+  const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
+  const sortedCountries = [...codes].sort((a,b) => (countryNames.of(a)||a).localeCompare(countryNames.of(b)||b,"en"));
+  sortedCountries.forEach(code => {
+    const option = document.createElement("option");
+    option.value = code;
+    option.textContent = `${countryNames.of(code)||code} · ${code}`;
+    countryInput.append(option);
   });
-
-  const sortedCountries = [...codes].sort((a, b) =>
-    countryName(a).localeCompare(countryName(b), "en")
-  );
-
-  function showCountries() {
-    const q = countryInput.value.trim().toLowerCase();
-
-    const matches = sortedCountries.filter(code =>
-      countryName(code).toLowerCase().includes(q) ||
-      code.toLowerCase().includes(q)
-    );
-
-    countryList.replaceChildren();
-
-    matches.forEach(code => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.setAttribute("role", "option");
-      button.className = "block w-full rounded-lg px-3 py-2 text-left text-sm text-white hover:bg-[#1E3A8A] focus:bg-[#1E3A8A]";
-      button.textContent = `${countryName(code)} · ${code}`;
-
-      button.addEventListener("click", () => {
-        selectedCountry = code;
-        countryInput.value = countryName(code);
-        closeCountries();
-        countryInput.focus();
-      });
-
-      countryList.append(button);
-    });
-
-    if (!matches.length) {
-      const empty = document.createElement("p");
-      empty.className = "p-3 text-sm muted";
-      empty.textContent = "No countries found";
-      countryList.append(empty);
-    }
-
-    const rect = countryInput.getBoundingClientRect();
-    countryList.style.top = `${Math.min(rect.bottom + 4, window.innerHeight - 240)}px`;
-    countryList.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8))}px`;
-    countryList.style.width = `${Math.min(rect.width, window.innerWidth - 16)}px`;
-    countryList.classList.remove("hidden");
-    countryInput.setAttribute("aria-expanded", "true");
-  }
-  function closeCountries(){countryList.classList.add("hidden");countryInput.setAttribute("aria-expanded","false")}
-  countryInput.addEventListener("input",()=>{selectedCountry="";showCountries()});countryInput.addEventListener("focus",showCountries);
-  countryInput.addEventListener("keydown",e=>{if(e.key==="Escape")closeCountries();if(e.key==="ArrowDown"){e.preventDefault();countryList.querySelector("button")?.focus()}if(e.key==="Enter"){e.preventDefault();countryList.querySelector("button")?.click()}});
-  countryList.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCountries();countryInput.focus()}if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const bs=[...countryList.querySelectorAll("button")],i=bs.indexOf(document.activeElement);bs[Math.max(0,Math.min(bs.length-1,i+(e.key==="ArrowDown"?1:-1)))]?.focus()}});
-  document.addEventListener("pointerdown",e=>{if(!$("country-combobox").contains(e.target)&&!countryList.contains(e.target))closeCountries()});
-  window.addEventListener("resize",closeCountries);
-  window.addEventListener("scroll",closeCountries,true);
+  countryInput.addEventListener("change", () => { selectedCountry = countryInput.value; });
   const mime=["image/png","image/jpeg","image/webp"];
   function status(state){formState=state;const el=$("form-status");el.className="status "+state;el.replaceChildren();if(state==="processing"){const s=document.createElement("span");s.className="spinner";el.append(s)}el.append(document.createTextNode(" "+({available:translations[lang].available,processing:translations[lang].processing,success:translations[lang].success,error:translations[lang].error,disabled:"Disabled"}[state])))}
   function message(text,isError=false){const el=$("submit-message");el.textContent=text;el.style.color=isError?"#ffb4b4":"#d1e8f0"}
