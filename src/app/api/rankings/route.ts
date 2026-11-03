@@ -23,7 +23,8 @@ export async function GET() {
     const { data, error } = await supabase
       .from("certificates")
       .select("participant_id, upload_date_kst, status, participants!inner(x_username,country_code)")
-      .in("status", ["pending", "verified"]);
+      .in("status", ["pending", "verified"])
+      .eq("artist", "ENHYPEN");
 
     if (error) throw error;
 
