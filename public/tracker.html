@@ -495,7 +495,7 @@
   function drawUsers(){ loadRankings(); }
 
   for(const kind of ["country","user"])for(const period of ["daily","overall"]){$(kind+"-"+period).onclick=()=>{if(kind==="country"){countryPeriod=period;drawCountry()}else{userPeriod=period;drawUsers()}$(kind+"-daily").setAttribute("aria-selected",String(period==="daily"));$(kind+"-overall").setAttribute("aria-selected",String(period==="overall"))}}
-  $("language").addEventListener("change",e=>{lang=e.target.value;document.documentElement.lang=lang==="pt"?"pt-BR":lang==="es"?"es-419":"en";["submit","challenge","ranking"].forEach((name,i)=>{$("nav-"+name).textContent=translations[lang].nav[i]});countryInput.placeholder=translations[lang].search;if(selectedCountry)countryInput.value=countryName(selectedCountry);$("file-count").textContent=translations[lang].files(files.length);status(formState);drawCountry();drawUsers();closeCountries()});
+  $("language").addEventListener("change",e=>{lang=e.target.value;document.documentElement.lang=lang==="pt"?"pt-BR":lang==="es"?"es-419":"en";["submit","challenge","ranking"].forEach((name,i)=>{$("nav-"+name).textContent=translations[lang].nav[i]});if(selectedCountry)countryInput.value=selectedCountry;$("file-count").textContent=translations[lang].files(files.length);status(formState);drawCountry();drawUsers()});
   loadRankings();\n  loadCollabMission();
   window.addEventListener("beforeunload",()=>files.forEach(item=>URL.revokeObjectURL(item.url)));
 })();
