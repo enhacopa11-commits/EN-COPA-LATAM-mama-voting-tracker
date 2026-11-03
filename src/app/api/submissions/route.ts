@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 
 export const maxDuration = 300;
 
-const MAX_FILES = 5;
+const MAX_FILES = 1;
 const MAX_SIZE = 5 * 1024 * 1024;
 const MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
@@ -33,18 +33,20 @@ function parseDate(text: string): string | null {
     /\b([0-3]?\d)\s+(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s+(20\d{2})\b/i,
   ];
 
+  const normalized = text.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  const localized = normalized.match(/(20\\d{2})\\s*(?:年|년)\\s*(0?[1-9]|1[0-2])\\s*(?:月|월)\\s*(0?[1-9]|[12]\\d|3[01])\\s*(?:日|号|일)?/);
   let year: number, month: number, day: number;
-  let match = text.match(patterns[0]);
+  let match: RegExpMatchArray | null = localized || normalized.match(patterns[0]);
   if (match) {
     year = Number(match[1]); month = Number(match[2]); day = Number(match[3]);
-  } else if ((match = text.match(patterns[1]))) {
+  } else if ((match = normalized.match(patterns[1]))) {
     month = Number(match[1]); day = Number(match[2]); year = Number(match[3]);
   } else {
     const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-    if ((match = text.match(patterns[2]))) {
+    if ((match = normalized.match(patterns[2]))) {
       month = months.indexOf(match[1].toUpperCase()) + 1;
       day = Number(match[2]); year = Number(match[3]);
-    } else if ((match = text.match(patterns[3]))) {
+    } else if ((match = normalized.match(patterns[3]))) {
       day = Number(match[1]);
       month = months.indexOf(match[2].toUpperCase()) + 1;
       year = Number(match[3]);
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid X username or country." }, { status: 400 });
     }
     if (!files.length || files.length > MAX_FILES) {
-      return NextResponse.json({ error: "Upload between 1 and 5 images." }, { status: 400 });
+      return NextResponse.json({ error: "Upload one image per request." }, { status: 400 });
     }
 
     for (const file of files) {
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
 
     const today = kstDate();
     const results: Array<Record<string, unknown>> = [];
-    const worker = await createWorker("eng");
+    const worker = await createWorker("eng+jpn+kor+chi_sim+chi_tra");
 
     try {
       for (const file of files) {
