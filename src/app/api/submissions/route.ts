@@ -167,15 +167,15 @@ export async function POST(request: Request) {
           const reference = extractReference(text);
           const certificateDate = parseDate(text);
           const normalizedText = text.toUpperCase().replace(/[^A-Z0-9]+/g, " ");
-          const artist = /\\bCORTIS\\b/.test(normalizedText)
+          const artist = /\bCORTIS\b/.test(normalizedText)
             ? "CORTIS"
-            : /\\bENHYPEN\\b/.test(normalizedText)
+            : /\bENHYPEN\b/.test(normalizedText)
               ? "ENHYPEN"
               : null;
           const platform = artist === "CORTIS"
-            ? (/MNET\\s*PLUS|MNETPLUS/.test(normalizedText)
+            ? (/MNET\s*PLUS|MNETPLUS/.test(normalizedText)
                 ? "mnet_plus"
-                : (/MELON\\s*MUSIC\\s*AWARDS|\\bMMA\\b/.test(normalizedText)
+                : (/MELON\s*MUSIC\s*AWARDS|\bMMA\b/.test(normalizedText)
                     ? "mma"
                     : null))
             : null;
