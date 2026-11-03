@@ -229,13 +229,13 @@
       <div class="canva-card panel p-6 md:p-9" style="background:linear-gradient(135deg,#111b2d 0%,#172b3d 55%,#102b2b 100%);border:1px solid #10B98166">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div><p class="eyebrow mb-3" style="color:#34D399">04 / SPECIAL OPERATION</p>
-            <p class="text-xs font-bold tracking-[.25em] text-emerald-300">EN-COPA LATAM × CORTIS FANS</p>
+            <p class="text-xs font-bold tracking-[.25em] text-emerald-300">EN-COPA LATAM × ENHYPEN × CORTIS</p>
             <h2 class="heading mt-2 text-3xl md:text-4xl font-bold text-white">COLLAB MISSION</h2>
             <p class="mt-2 text-sm tracking-widest text-emerald-200">ONE TEAM. ONE GOAL.</p>
           </div>
           <span class="rounded-full border border-emerald-400/40 px-3 py-2 text-xs font-bold text-emerald-200">COMMUNITY CHALLENGE · KST</span>
         </div>
-        <p class="mt-5 max-w-3xl text-sm leading-6 text-slate-300">Cada ENGENE registra individualmente su contribución y adjunta una captura. Los datos representan reportes de la comunidad, no votos verificados directamente por las plataformas.</p>
+        <p class="mt-5 max-w-3xl text-sm leading-6 text-slate-300">Sube tus certificados desde el formulario principal. El sistema identifica automáticamente si pertenecen a ENHYPEN o CORTIS y, en los certificados de CORTIS, detecta Mnet Plus o MMA. Cada certificado único aceptado suma una unidad a su ranking correspondiente.</p>
         <div class="mt-7 grid gap-4 md:grid-cols-2">
           <article class="rounded-2xl border border-emerald-400/30 bg-slate-950/40 p-5">
             <div class="flex items-center justify-between gap-3"><span class="text-xs font-bold tracking-widest text-emerald-200">MNET PLUS · FANS’ CHOICE MALE</span><span id="collab-mnet-percent" class="text-2xl font-bold text-white">0%</span></div>
@@ -250,22 +250,10 @@
         </div>
         <div class="mt-5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400"><span>DAILY RESET · 00:00 KST</span><span id="collab-date">Loading KST date…</span><span id="collab-participants">0 participants today</span></div>
         <div class="mt-8 grid gap-7 lg:grid-cols-[.9fr_1.1fr]">
-          <form id="collab-form" class="rounded-2xl border border-slate-600 bg-slate-950/40 p-5">
-            <h3 class="text-lg font-bold text-white">SUBMIT YOUR CONTRIBUTION</h3>
-            <p class="mt-1 text-xs text-slate-400">One submission per platform, per participant, per KST day.</p>
-            <label class="mt-5 block text-xs font-semibold text-slate-300" for="collab-username">X USERNAME</label>
-            <input id="collab-username" name="username" required maxlength="16" placeholder="@username" class="field mt-2 w-full">
-            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-country">COUNTRY CODE (2 LETTERS)</label>
-            <input id="collab-country" name="countryCode" required maxlength="2" pattern="[A-Za-z]{2}" placeholder="MX" class="field mt-2 w-full uppercase">
-            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-platform">PLATFORM</label>
-            <select id="collab-platform" name="platform" required class="field mt-2 w-full"><option value="mnet_plus">Mnet Plus · 10,000 goal</option><option value="mma">MMA · 5,000 goal</option></select>
-            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-votes">VOTES REPORTED</label>
-            <input id="collab-votes" name="votes" type="number" min="1" max="10000" required placeholder="Enter contribution" class="field mt-2 w-full">
-            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-proof">SCREENSHOT PROOF · PNG / JPG / WEBP · MAX 5 MB</label>
-            <input id="collab-proof" name="proof" type="file" accept="image/png,image/jpeg,image/webp" required class="mt-2 block w-full text-sm text-slate-300">
-            <button id="collab-submit" type="submit" class="mt-5 w-full rounded-xl bg-emerald-400 px-5 py-3 font-bold text-slate-950 transition hover:bg-emerald-300">SUBMIT CONTRIBUTION</button>
-            <p id="collab-status" role="status" aria-live="polite" class="mt-3 text-sm text-slate-300"></p>
-          </form>
+          <div class="rounded-xl border border-emerald-400/30 bg-emerald-950/30 p-5">
+        <h3 class="font-bold text-emerald-200">AUTOMATIC CERTIFICATE DETECTION</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-300">No ingreses cantidades manualmente. Usa el formulario principal de envío de certificados: el OCR detectará CORTIS y su plataforma para sumar cada certificado válido a esta misión.</p>
+      </div>
           <article class="rounded-2xl border border-slate-600 bg-slate-950/40 p-5">
             <div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-lg font-bold text-white">INDIVIDUAL LEADERBOARD</h3><span class="text-xs text-slate-400">TODAY · KST</span></div>
             <p class="mt-1 text-xs text-slate-400">Community-reported contributions, shown separately by platform.</p>
@@ -420,6 +408,7 @@
       $("proof-form").reset();
       selectedCountry = "";
       await loadRankings();
+      await loadCollabMission();
     } catch (error) {
       status("error");
       message(error instanceof Error ? error.message : "Submission failed.", true);
@@ -474,36 +463,7 @@
     }
   }
 
-  $("collab-form").addEventListener("submit", async event => {
-    event.preventDefault();
-    const form = $("collab-form"), button = $("collab-submit"), status = $("collab-status");
-    const platform = $("collab-platform").value;
-    const amount = Number($("collab-votes").value);
-    const max = platform === "mnet_plus" ? 10000 : 5000;
-    if (!Number.isInteger(amount) || amount < 1 || amount > max) {
-      status.textContent = "Enter a valid amount for the selected platform (maximum " + max.toLocaleString() + ").";
-      return;
-    }
-    button.disabled = true; button.textContent = "SUBMITTING…"; status.textContent = "Uploading your proof…";
-    try {
-      const response = await fetch("/api/collab-mission", { method: "POST", body: new FormData(form) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Submission failed.");
-      status.textContent = "Contribution recorded successfully!";
-      form.reset();
-      await loadCollabMission();
-    } catch (error) {
-      status.textContent = error instanceof Error ? error.message : "Could not submit contribution.";
-    } finally {
-      button.disabled = false; button.textContent = "SUBMIT CONTRIBUTION";
-    }
-  });
-  $("collab-platform").addEventListener("change", () => {
-    $("collab-votes").max = $("collab-platform").value === "mma" ? "5000" : "10000";
-  });
-  $("collab-country").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g,"").slice(0,2); });
-  $("collab-username").addEventListener("input", e => { e.target.value = e.target.value.replace(/^@/,"").replace(/[^A-Za-z0-9_]/g,"").slice(0,15); });
-\n  async function loadRankings() {
+  async function loadRankings() {
     try {
       const response = await fetch("/api/rankings", { cache: "no-store" });
       if (!response.ok) throw new Error("Rankings unavailable");
