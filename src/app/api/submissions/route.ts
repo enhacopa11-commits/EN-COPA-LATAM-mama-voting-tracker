@@ -166,6 +166,19 @@ export async function POST(request: Request) {
           const confidence = Number(recognition.data.confidence || 0);
           const reference = extractReference(text);
           const certificateDate = parseDate(text);
+          const normalizedText = text.toUpperCase().replace(/[^A-Z0-9]+/g, " ");
+          const artist = /\\bCORTIS\\b/.test(normalizedText)
+            ? "CORTIS"
+            : /\\bENHYPEN\\b/.test(normalizedText)
+              ? "ENHYPEN"
+              : null;
+          const platform = artist === "CORTIS"
+            ? (/MNET\\s*PLUS|MNETPLUS/.test(normalizedText)
+                ? "mnet_plus"
+                : (/MELON\\s*MUSIC\\s*AWARDS|\\bMMA\\b/.test(normalizedText)
+                    ? "mma"
+                    : null))
+            : null;
 
           let status = "ocr_failed";
           let message = "Could not confidently read a certificate reference and date.";
@@ -174,6 +187,10 @@ export async function POST(request: Request) {
             message = "Image text is not clear enough for automatic reading.";
           } else if (!reference || !certificateDate) {
             message = "Reference number or certificate date was not detected.";
+          } else if (!artist) {
+            message = "Artist name was not detected. Upload a clear certificate showing ENHYPEN or CORTIS.";
+          } else if (artist === "CORTIS" && !platform) {
+            message = "CORTIS was detected, but Mnet Plus or MMA could not be identified.";
           } else if (!isAllowedDate(certificateDate, today)) {
             status = "rejected";
             message = "Certificate date is outside the accepted KST date window.";
@@ -183,6 +200,8 @@ export async function POST(request: Request) {
               reference_number: reference,
               certificate_date: certificateDate,
               upload_date_kst: today,
+              artist,
+              platform,
               status: "pending",
             });
 
