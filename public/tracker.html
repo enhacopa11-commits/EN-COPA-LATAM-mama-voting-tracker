@@ -67,7 +67,7 @@
    <header data-template-id="site-header" class="canva-header sticky top-0 z-30 border-b border-[#48617b66] bg-[#0B0F19]/95 backdrop-blur-xl" style="background: rgb(11, 15, 25);">
     <div class="site-width flex flex-wrap items-center justify-between gap-3 py-4"><a href="#top" class="flex items-center gap-3 no-underline text-white" aria-label="EN-COPA LATAM, inicio"> <span class="flex h-12 w-12 items-center justify-center rounded-xl border border-dashed border-[#6b91ac] bg-[#14283a] text-center text-[9px] leading-tight text-[#9CA3AF]" aria-hidden="true">LOGO<br>
        OFICIAL</span> <span><strong data-template-id="header-brand" class="canva-text block tracking-[.09em]" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">EN-COPA LATAM</strong><span data-template-id="header-subtitle" class="canva-text block text-[10px] tracking-[.13em]" style="color: rgb(156, 163, 175); font-weight: 400; font-style: normal; font-size: 16px;">MAMA 2026 VOTING TRACKER</span></span> </a>
-     <nav aria-label="Secciones" class="mobile-scroll order-3 flex w-full items-center gap-5 text-sm md:order-none md:w-auto"><a class="nav-link whitespace-nowrap" href="#submit" id="nav-submit">Submit proof</a><a class="nav-link whitespace-nowrap" href="#challenge" id="nav-challenge">Daily challenge</a><a class="nav-link whitespace-nowrap" href="#participation" id="nav-ranking">Rankings</a>
+     <nav aria-label="Secciones" class="mobile-scroll order-3 flex w-full items-center gap-5 text-sm md:order-none md:w-auto"><a class="nav-link whitespace-nowrap" href="#submit" id="nav-submit">Submit proof</a><a class="nav-link whitespace-nowrap" href="#challenge" id="nav-challenge">Daily challenge</a><a class="nav-link whitespace-nowrap" href="#participation" id="nav-ranking">Rankings</a><a class="nav-link whitespace-nowrap" href="#collab-mission">Collab Mission</a>
      </nav>
      <div class="flex items-center gap-3"><span data-template-id="campaign-status" class="canva-tag hidden rounded-full border border-[#34D39966] bg-[#103b35] px-3 py-2 text-xs font-bold text-[#34D399] sm:inline-block" style="background: rgb(16, 59, 53); color: rgb(52, 211, 153); font-weight: 400; font-style: normal; font-size: 16px;">● ACTIVE CAMPAIGN · DEMO</span> <label for="language" class="sr-only">Idioma / Language / Idioma</label> <select id="language" aria-label="Idioma / Language / Idioma" class="field !w-auto !py-2 !pl-3 !pr-7 text-sm font-bold"><option value="es">ES</option><option value="en">EN</option><option value="pt">PT</option></select>
      </div>
@@ -223,6 +223,57 @@
      <aside class="mt-6 rounded-xl border border-[#426078] bg-[#162437] p-4 text-sm" aria-label="Ranking movement legend">
       <strong class="mr-4">RANKING MOVEMENT</strong><span class="mr-4 move-up">↑ Moved up</span><span class="mr-4 move-down">↓ Moved down</span><span class="mr-4 move-flat">– Unchanged</span><span class="move-new">NEW First appearance</span>
      </aside>
+    </section>
+
+    <section id="collab-mission" class="mb-12 scroll-mt-24">
+      <div class="canva-card panel p-6 md:p-9" style="background:linear-gradient(135deg,#111b2d 0%,#172b3d 55%,#102b2b 100%);border:1px solid #10B98166">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div><p class="eyebrow mb-3" style="color:#34D399">04 / SPECIAL OPERATION</p>
+            <p class="text-xs font-bold tracking-[.25em] text-emerald-300">EN-COPA LATAM × CORTIS FANS</p>
+            <h2 class="heading mt-2 text-3xl md:text-4xl font-bold text-white">COLLAB MISSION</h2>
+            <p class="mt-2 text-sm tracking-widest text-emerald-200">ONE TEAM. ONE GOAL.</p>
+          </div>
+          <span class="rounded-full border border-emerald-400/40 px-3 py-2 text-xs font-bold text-emerald-200">COMMUNITY CHALLENGE · KST</span>
+        </div>
+        <p class="mt-5 max-w-3xl text-sm leading-6 text-slate-300">Cada ENGENE registra individualmente su contribución y adjunta una captura. Los datos representan reportes de la comunidad, no votos verificados directamente por las plataformas.</p>
+        <div class="mt-7 grid gap-4 md:grid-cols-2">
+          <article class="rounded-2xl border border-emerald-400/30 bg-slate-950/40 p-5">
+            <div class="flex items-center justify-between gap-3"><span class="text-xs font-bold tracking-widest text-emerald-200">MNET PLUS · FANS’ CHOICE MALE</span><span id="collab-mnet-percent" class="text-2xl font-bold text-white">0%</span></div>
+            <p class="mt-3 text-3xl font-bold text-white"><span id="collab-mnet-total">0</span><span class="text-sm font-normal text-slate-400"> / 10,000 votes</span></p>
+            <div class="mt-4 h-3 overflow-hidden rounded-full bg-slate-700"><div id="collab-mnet-bar" class="h-full rounded-full bg-emerald-400" style="width:0%"></div></div>
+          </article>
+          <article class="rounded-2xl border border-cyan-300/30 bg-slate-950/40 p-5">
+            <div class="flex items-center justify-between gap-3"><span class="text-xs font-bold tracking-widest text-cyan-200">MMA</span><span id="collab-mma-percent" class="text-2xl font-bold text-white">0%</span></div>
+            <p class="mt-3 text-3xl font-bold text-white"><span id="collab-mma-total">0</span><span class="text-sm font-normal text-slate-400"> / 5,000 votes</span></p>
+            <div class="mt-4 h-3 overflow-hidden rounded-full bg-slate-700"><div id="collab-mma-bar" class="h-full rounded-full bg-cyan-300" style="width:0%"></div></div>
+          </article>
+        </div>
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400"><span>DAILY RESET · 00:00 KST</span><span id="collab-date">Loading KST date…</span><span id="collab-participants">0 participants today</span></div>
+        <div class="mt-8 grid gap-7 lg:grid-cols-[.9fr_1.1fr]">
+          <form id="collab-form" class="rounded-2xl border border-slate-600 bg-slate-950/40 p-5">
+            <h3 class="text-lg font-bold text-white">SUBMIT YOUR CONTRIBUTION</h3>
+            <p class="mt-1 text-xs text-slate-400">One submission per platform, per participant, per KST day.</p>
+            <label class="mt-5 block text-xs font-semibold text-slate-300" for="collab-username">X USERNAME</label>
+            <input id="collab-username" name="username" required maxlength="16" placeholder="@username" class="field mt-2 w-full">
+            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-country">COUNTRY CODE (2 LETTERS)</label>
+            <input id="collab-country" name="countryCode" required maxlength="2" pattern="[A-Za-z]{2}" placeholder="MX" class="field mt-2 w-full uppercase">
+            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-platform">PLATFORM</label>
+            <select id="collab-platform" name="platform" required class="field mt-2 w-full"><option value="mnet_plus">Mnet Plus · 10,000 goal</option><option value="mma">MMA · 5,000 goal</option></select>
+            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-votes">VOTES REPORTED</label>
+            <input id="collab-votes" name="votes" type="number" min="1" max="10000" required placeholder="Enter contribution" class="field mt-2 w-full">
+            <label class="mt-4 block text-xs font-semibold text-slate-300" for="collab-proof">SCREENSHOT PROOF · PNG / JPG / WEBP · MAX 5 MB</label>
+            <input id="collab-proof" name="proof" type="file" accept="image/png,image/jpeg,image/webp" required class="mt-2 block w-full text-sm text-slate-300">
+            <button id="collab-submit" type="submit" class="mt-5 w-full rounded-xl bg-emerald-400 px-5 py-3 font-bold text-slate-950 transition hover:bg-emerald-300">SUBMIT CONTRIBUTION</button>
+            <p id="collab-status" role="status" aria-live="polite" class="mt-3 text-sm text-slate-300"></p>
+          </form>
+          <article class="rounded-2xl border border-slate-600 bg-slate-950/40 p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-lg font-bold text-white">INDIVIDUAL LEADERBOARD</h3><span class="text-xs text-slate-400">TODAY · KST</span></div>
+            <p class="mt-1 text-xs text-slate-400">Community-reported contributions, shown separately by platform.</p>
+            <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="text-xs uppercase text-slate-400"><tr><th class="py-3 pr-2"># / ENGENE</th><th class="py-3 pr-2">MNET+</th><th class="py-3">MMA</th></tr></thead><tbody id="collab-ranking" class="divide-y divide-slate-700 text-slate-200"><tr><td colspan="3" class="py-5 text-slate-400">Loading contributions…</td></tr></tbody></table></div>
+            <p class="mt-4 text-xs text-slate-500">Submissions are not independently verified by Mnet Plus or MMA. Do not upload screenshots containing sensitive personal information.</p>
+          </article>
+        </div>
+      </div>
     </section>
    </main>
    <footer data-template-id="site-footer" class="canva-footer border-t border-[#40546e] bg-[#0e1725] py-10" style="background: rgb(14, 23, 37);">
@@ -385,7 +436,74 @@
   $("history-tab").onclick=()=>setTab("today-tab","history-tab","today-view","history-view",true);
   const kst=new Date(Date.now()+9*3600000),fmt=d=>new Intl.DateTimeFormat("en-US",{timeZone:"UTC",year:"numeric",month:"short",day:"numeric"}).format(d);
   $("kst-date").textContent=`${fmt(kst)} · Korea Standard Time (KST)`;
-  async function loadRankings() {
+
+  async function loadCollabMission() {
+    const body = $("collab-ranking");
+    try {
+      const response = await fetch("/api/collab-mission", { cache: "no-store" });
+      if (!response.ok) throw new Error("Could not load collaboration mission.");
+      const data = await response.json();
+      const fmt = n => Number(n || 0).toLocaleString();
+      $("collab-mnet-total").textContent = fmt(data.totals.mnet_plus);
+      $("collab-mma-total").textContent = fmt(data.totals.mma);
+      $("collab-mnet-percent").textContent = Math.round(data.progress.mnet_plus) + "%";
+      $("collab-mma-percent").textContent = Math.round(data.progress.mma) + "%";
+      $("collab-mnet-bar").style.width = data.progress.mnet_plus + "%";
+      $("collab-mma-bar").style.width = data.progress.mma + "%";
+      $("collab-date").textContent = data.dateKST + " · Korea Standard Time";
+      $("collab-participants").textContent = fmt(data.totalParticipants) + " participants today";
+      body.replaceChildren();
+      if (!data.ranking.length) {
+        const tr = document.createElement("tr"), td = document.createElement("td");
+        td.colSpan = 3; td.className = "py-5 text-slate-400"; td.textContent = "No contributions yet. Be the first!";
+        tr.append(td); body.append(tr); return;
+      }
+      data.ranking.forEach((user, i) => {
+        const tr = document.createElement("tr");
+        const name = document.createElement("td"); name.className = "py-3 pr-2";
+        name.textContent = (i + 1) + ". @" + user.username;
+        const country = document.createElement("span"); country.className = "block text-xs text-slate-500"; country.textContent = user.countryCode;
+        name.append(country);
+        const mnet = document.createElement("td"); mnet.className = "py-3 pr-2"; mnet.textContent = fmt(user.mnetPlusVotes);
+        const mma = document.createElement("td"); mma.className = "py-3"; mma.textContent = fmt(user.mmaVotes);
+        tr.append(name,mnet,mma); body.append(tr);
+      });
+    } catch (error) {
+      console.error(error);
+      body.innerHTML = '<tr><td colspan="3" class="py-5 text-rose-300">Could not load collaboration data.</td></tr>';
+    }
+  }
+
+  $("collab-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = $("collab-form"), button = $("collab-submit"), status = $("collab-status");
+    const platform = $("collab-platform").value;
+    const amount = Number($("collab-votes").value);
+    const max = platform === "mnet_plus" ? 10000 : 5000;
+    if (!Number.isInteger(amount) || amount < 1 || amount > max) {
+      status.textContent = "Enter a valid amount for the selected platform (maximum " + max.toLocaleString() + ").";
+      return;
+    }
+    button.disabled = true; button.textContent = "SUBMITTING…"; status.textContent = "Uploading your proof…";
+    try {
+      const response = await fetch("/api/collab-mission", { method: "POST", body: new FormData(form) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Submission failed.");
+      status.textContent = "Contribution recorded successfully!";
+      form.reset();
+      await loadCollabMission();
+    } catch (error) {
+      status.textContent = error instanceof Error ? error.message : "Could not submit contribution.";
+    } finally {
+      button.disabled = false; button.textContent = "SUBMIT CONTRIBUTION";
+    }
+  });
+  $("collab-platform").addEventListener("change", () => {
+    $("collab-votes").max = $("collab-platform").value === "mma" ? "5000" : "10000";
+  });
+  $("collab-country").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g,"").slice(0,2); });
+  $("collab-username").addEventListener("input", e => { e.target.value = e.target.value.replace(/^@/,"").replace(/[^A-Za-z0-9_]/g,"").slice(0,15); });
+\n  async function loadRankings() {
     try {
       const response = await fetch("/api/rankings", { cache: "no-store" });
       if (!response.ok) throw new Error("Rankings unavailable");
@@ -468,7 +586,7 @@
 
   for(const kind of ["country","user"])for(const period of ["daily","overall"]){$(kind+"-"+period).onclick=()=>{if(kind==="country"){countryPeriod=period;drawCountry()}else{userPeriod=period;drawUsers()}$(kind+"-daily").setAttribute("aria-selected",String(period==="daily"));$(kind+"-overall").setAttribute("aria-selected",String(period==="overall"))}}
   $("language").addEventListener("change",e=>{lang=e.target.value;document.documentElement.lang=lang==="pt"?"pt-BR":lang==="es"?"es-419":"en";["submit","challenge","ranking"].forEach((name,i)=>{$("nav-"+name).textContent=translations[lang].nav[i]});countryInput.placeholder=translations[lang].search;if(selectedCountry)countryInput.value=countryName(selectedCountry);$("file-count").textContent=translations[lang].files(files.length);status(formState);drawCountry();drawUsers();closeCountries()});
-  loadRankings();
+  loadRankings();\n  loadCollabMission();
   window.addEventListener("beforeunload",()=>files.forEach(item=>URL.revokeObjectURL(item.url)));
 })();
 </script>
