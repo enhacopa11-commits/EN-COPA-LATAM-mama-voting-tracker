@@ -296,6 +296,14 @@
 
   const countryList = $("country-list");
   const countryInput = $("country-search");
+  // Render the menu at document level so no card, grid, or section can clip it.
+  document.body.append(countryList);
+  Object.assign(countryList.style, {
+    position: "fixed",
+    zIndex: "99999",
+    maxHeight: "min(15rem, 45vh)",
+    overflowY: "auto"
+  });
 
   const sortedCountries = [...codes].sort((a, b) =>
     countryName(a).localeCompare(countryName(b), "en")
@@ -335,6 +343,10 @@
       countryList.append(empty);
     }
 
+    const rect = countryInput.getBoundingClientRect();
+    countryList.style.top = `${Math.min(rect.bottom + 4, window.innerHeight - 240)}px`;
+    countryList.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8))}px`;
+    countryList.style.width = `${Math.min(rect.width, window.innerWidth - 16)}px`;
     countryList.classList.remove("hidden");
     countryInput.setAttribute("aria-expanded", "true");
   }
@@ -342,7 +354,9 @@
   countryInput.addEventListener("input",()=>{selectedCountry="";showCountries()});countryInput.addEventListener("focus",showCountries);
   countryInput.addEventListener("keydown",e=>{if(e.key==="Escape")closeCountries();if(e.key==="ArrowDown"){e.preventDefault();countryList.querySelector("button")?.focus()}if(e.key==="Enter"){e.preventDefault();countryList.querySelector("button")?.click()}});
   countryList.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCountries();countryInput.focus()}if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const bs=[...countryList.querySelectorAll("button")],i=bs.indexOf(document.activeElement);bs[Math.max(0,Math.min(bs.length-1,i+(e.key==="ArrowDown"?1:-1)))]?.focus()}});
-  document.addEventListener("pointerdown",e=>{if(!$("country-combobox").contains(e.target))closeCountries()});
+  document.addEventListener("pointerdown",e=>{if(!$("country-combobox").contains(e.target)&&!countryList.contains(e.target))closeCountries()});
+  window.addEventListener("resize",closeCountries);
+  window.addEventListener("scroll",closeCountries,true);
   const mime=["image/png","image/jpeg","image/webp"];
   function status(state){formState=state;const el=$("form-status");el.className="status "+state;el.replaceChildren();if(state==="processing"){const s=document.createElement("span");s.className="spinner";el.append(s)}el.append(document.createTextNode(" "+({available:translations[lang].available,processing:translations[lang].processing,success:translations[lang].success,error:translations[lang].error,disabled:"Disabled"}[state])))}
   function message(text,isError=false){const el=$("submit-message");el.textContent=text;el.style.color=isError?"#ffb4b4":"#d1e8f0"}
