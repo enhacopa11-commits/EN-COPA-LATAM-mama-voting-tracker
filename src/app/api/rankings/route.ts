@@ -32,7 +32,7 @@ export async function GET() {
       .sort((a, b) => b.count - a.count || a.username.localeCompare(b.username))
       .map((item, index) => ({ rank: index + 1, ...item }));
     const byCountry = [...countries.entries()]
-      .map(([country, count]) => ({ country, count }))
+      .map(([country, count]) => ({ country, count, percentage: (data?.length ? (count / data.length) * 100 : 0) }))
       .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country))
       .map((item, index) => ({ rank: index + 1, ...item }));
 
