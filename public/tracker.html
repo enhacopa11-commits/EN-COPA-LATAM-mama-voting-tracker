@@ -238,6 +238,7 @@
       const failed=results.filter(x=>x.status!=="saved");
       showMessage("Saved "+saved+" of "+total+" image(s)."+(failed.length?"\n"+failed.length+" image(s) could not be saved. Please try those again.":""));
       setStatus(saved===total?"Submitted successfully":saved?"Partially submitted":"Submission failed",saved?"success":"error");
+      if(saved>0)await refreshRankings();
       const savedIds=new Set(results.filter(x=>x.status==="saved").map(x=>x.id));
       files.forEach(x=>{if(savedIds.has(x.id))URL.revokeObjectURL(x.url);});
       files=files.filter(x=>!savedIds.has(x.id));
