@@ -9,6 +9,19 @@ function db() {
   return createClient(url, key);
 }
 
+function errorDetails(error: unknown) {
+  if (error && typeof error === "object") {
+    const e = error as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+    return {
+      message: typeof e.message === "string" ? e.message : "Unknown database error",
+      code: typeof e.code === "string" ? e.code : undefined,
+      details: typeof e.details === "string" ? e.details : undefined,
+      hint: typeof e.hint === "string" ? e.hint : undefined,
+    };
+  }
+  return { message: String(error) };
+}
+
 export async function GET() {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
@@ -20,12 +33,12 @@ export async function GET() {
     const rows = await Promise.all((data || []).map(async row => {
       const { data: signed, error: signedError } = await supabase.storage.from("certificates")
         .createSignedUrl(row.storage_path, 60 * 10);
-      if (signedError) console.error("Could not sign proof image", signedError);
+      if (signedError) console.error("Could not sign proof image", errorDetails(signedError));
       return { ...row, image_url: signed?.signedUrl || null };
     }));
     return NextResponse.json({ submissions: rows });
   } catch (error) {
-    console.error("Admin submissions error:", error);
+    console.error("Admin submissions error:", errorDetails(error));
     return NextResponse.json({ error: "Could not load submissions. Check that the proof_submissions table and private storage bucket exist." }, { status: 500 });
   }
 }
@@ -42,7 +55,7 @@ export async function PATCH(request: Request) {
     if (error) throw error;
     return NextResponse.json({ submission: data });
   } catch (error) {
-    console.error("Admin status update error:", error);
+    console.error("Admin status update error:", errorDetails(error));
     return NextResponse.json({ error: "Could not update this submission." }, { status: 500 });
   }
 }
@@ -80,7 +93,16 @@ export async function DELETE(request: Request) {
       .eq("id", id)
       .eq("status", "rejected")
       .select("id");
-    if (deleteRowError) throw deleteRowError;
+    if (deleteRowError) {
+      const detail = errorDetails(deleteRowError);
+      console.error("Admin submission delete database error:", { stage, ...detail });
+      return NextResponse.json({
+        error: "Database deletion failed: " + detail.message,
+        code: detail.code,
+        details: detail.details,
+        hint: detail.hint,
+      }, { status: 500 });
+    }
     if (!deletedRows?.length) {
       return NextResponse.json({ error: "No record was deleted. Refresh the admin panel and try again." }, { status: 409 });
     }
@@ -90,16 +112,20 @@ export async function DELETE(request: Request) {
       .from("certificates")
       .remove([submission.storage_path]);
     if (storageError) {
-      console.error("Submission row deleted but storage cleanup failed:", storageError);
-      return NextResponse.json({ ok: true, warning: "Record deleted, but the stored image could not be removed automatically." });
+      const detail = errorDetails(storageError);
+      console.error("Submission row deleted but storage cleanup failed:", detail);
+      return NextResponse.json({ ok: true, warning: "Record deleted, but the stored image could not be removed automatically.", storageError: detail });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error("Admin submission delete error:", { stage, detail, error });
+    const detail = errorDetails(error);
+    console.error("Admin submission delete error:", { stage, ...detail });
     return NextResponse.json({
-      error: "Delete failed during: " + stage + ". " + detail,
+      error: "Delete failed during: " + stage + ". " + detail.message,
+      code: detail.code,
+      details: detail.details,
+      hint: detail.hint,
     }, { status: 500 });
   }
 }
