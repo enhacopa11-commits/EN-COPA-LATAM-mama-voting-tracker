@@ -11,7 +11,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from("proof_submissions")
       .select("participant_id,country_code,status,participants(x_username)")
-      .neq("status", "rejected")
+      .eq("status", "approved")
       .order("created_at", { ascending: false })
       .limit(10000);
     if (error) throw error;
