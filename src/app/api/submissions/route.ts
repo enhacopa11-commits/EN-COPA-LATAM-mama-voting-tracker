@@ -68,15 +68,15 @@ export async function POST(request: Request) {
       .limit(10000);
     if (duplicateLookupError) throw duplicateLookupError;
 
-    const normalizedOcr = ocrText.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
-    const ocrTokens = new Set(normalizedOcr.split(/\\s+/).filter(token => token.length > 2));
+    const normalizedOcr = ocrText.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+    const ocrTokens = new Set(normalizedOcr.split(/\s+/).filter(token => token.length > 2));
     const matches = (existing || []).flatMap(row => {
       const exact = row.sha256 === sha256;
       const visualDistance = perceptualHash && row.perceptual_hash
         ? hammingDistance(perceptualHash, row.perceptual_hash)
         : 65;
-      const priorText = String(row.ocr_text || "").toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
-      const priorTokens = new Set(priorText.split(/\\s+/).filter(token => token.length > 2));
+      const priorText = String(row.ocr_text || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+      const priorTokens = new Set(priorText.split(/\s+/).filter(token => token.length > 2));
       let overlap = 0;
       for (const token of ocrTokens) if (priorTokens.has(token)) overlap++;
       const ocrSimilarity = ocrTokens.size && priorTokens.size
