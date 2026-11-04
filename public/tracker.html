@@ -177,6 +177,86 @@
   <script>
 (() => {
   const $ = id => document.getElementById(id);
+  const translations = {
+    "EN-COPA LATAM · VOTING PROOF":["EN-COPA LATAM · PRUEBAS DE VOTACIÓN","EN-COPA LATAM · COMPROVANTES DE VOTAÇÃO"],
+    "EVERY VOTE COUNTS.":["CADA VOTO CUENTA.","CADA VOTO CONTA."],
+    "Teamwork makes the dream work. ENGENEs, let's see how your country stands in voting! Submit your voting proof, represent your country, and help bring it to the top of the leaderboard!":["¡El trabajo en equipo hace la diferencia! ENGENEs, descubre cómo se posiciona tu país. Envía tus pruebas y ayúdalo a llegar a lo más alto del ranking.","O trabalho em equipe faz a diferença! ENGENEs, veja a posição do seu país. Envie seus comprovantes e ajude-o a chegar ao topo do ranking!"],
+    "Submit your proof ↗":["Envía tu prueba ↗","Envie seu comprovante ↗"],
+    "Explore rankings":["Ver rankings","Ver rankings"],
+    "Submit proof":["Enviar prueba","Enviar comprovante"],
+    "Rankings":["Rankings","Rankings"],
+    "02 / LIVE LEADERBOARD":["02 / RANKING EN VIVO","02 / RANKING AO VIVO"],
+    "THE LATAM RACE":["LA COMPETENCIA LATAM","A DISPUTA LATAM"],
+    "Every submitted proof moves the board. Follow the individual and country rankings in real time.":["Cada prueba enviada mueve la clasificación. Sigue en tiempo real los rankings individuales y por país.","Cada comprovante enviado movimenta a classificação. Acompanhe em tempo real os rankings individuais e por país."],
+    "↻ Refresh rankings":["↻ Actualizar rankings","↻ Atualizar rankings"],
+    "TOTAL PROOFS COUNTED":["TOTAL DE PRUEBAS CONTABILIZADAS","TOTAL DE COMPROVANTES CONTABILIZADOS"],
+    "Pending and approved submissions":["Envíos pendientes y aprobados","Envios pendentes e aprovados"],
+    "AWAITING REVIEW":["PENDIENTES DE REVISIÓN","AGUARDANDO REVISÃO"],
+    "Provisional points, subject to admin review":["Puntos provisionales, sujetos a revisión administrativa","Pontos provisórios, sujeitos à revisão das admins"],
+    "THE PLAYERS":["LAS PARTICIPANTES","AS PARTICIPANTES"],
+    "Individual ranking":["Ranking individual","Ranking individual"],
+    "TOP PLAYERS":["TOP PARTICIPANTES","TOP PARTICIPANTES"],
+    "RANK":["POSICIÓN","POSIÇÃO"],
+    "ENGENE / X":["ENGENE / X","ENGENE / X"],
+    "COUNTRY":["PAÍS","PAÍS"],
+    "PROOFS":["PRUEBAS","COMPROVANTES"],
+    "THE TEAMS":["LOS PAÍSES","OS PAÍSES"],
+    "Country ranking":["Ranking por país","Ranking por país"],
+    "COUNTRY RACE":["COMPETENCIA POR PAÍS","DISPUTA POR PAÍS"],
+    "Provisional points count immediately and are removed if a proof is rejected.":["Los puntos se suman al enviar la prueba y se descuentan si la admin la rechaza.","Os pontos são somados no envio e retirados se a admin rejeitar o comprovante."],
+    "Rankings update automatically after each submission.":["Los rankings se actualizan automáticamente después de cada envío.","Os rankings são atualizados automaticamente após cada envio."],
+    "01 / SUBMISSION":["01 / ENVÍO","01 / ENVIO"],
+    "SEND YOUR VOTING PROOF":["ENVÍA TU PRUEBA DE VOTACIÓN","ENVIE SEU COMPROVANTE DE VOTAÇÃO"],
+    "Use this form to submit proof for any voting activity organized or supported by EN-COPA LATAM.":["Usa este formulario para enviar pruebas de cualquier votación organizada o respaldada por EN-COPA LATAM.","Use este formulário para enviar comprovantes de qualquer votação organizada ou apoiada pela EN-COPA LATAM."],
+    "HOW IT WORKS":["CÓMO FUNCIONA","COMO FUNCIONA"],
+    "1. Enter the voting campaign name.":["1. Escribe el nombre de la campaña de votación.","1. Informe o nome da campanha de votação."],
+    "2. Add your X username and country.":["2. Añade tu usuario de X y tu país.","2. Adicione seu usuário do X e seu país."],
+    "3. Upload your screenshots and submit.":["3. Sube tus capturas y envía el formulario.","3. Envie suas capturas de tela."],
+    "Your images will be stored privately for the EN-COPA LATAM team to review. Submitting proof does not automatically mean it has been approved or counted.":["Tus imágenes se almacenarán de forma privada para que el equipo de EN-COPA LATAM las revise. Enviar una prueba no significa que ya haya sido aprobada.","Suas imagens serão armazenadas em privado para análise da equipe EN-COPA LATAM. O envio não significa aprovação automática."],
+    "PRIVACY":["PRIVACIDAD","PRIVACIDADE"],
+    "VOTING / CAMPAIGN":["VOTACIÓN / CAMPAÑA","VOTAÇÃO / CAMPANHA"],
+    "X USERNAME":["USUARIO DE X","USUÁRIO DO X"],
+    "COUNTRY":["PAÍS","PAÍS"],
+    "PROOF SCREENSHOTS":["CAPTURAS DE LA PRUEBA","CAPTURAS DO COMPROVANTE"],
+    "Choose screenshots":["Elegir capturas","Selecionar capturas"],
+    "SUBMIT PROOF":["ENVIAR PRUEBA","ENVIAR COMPROVANTE"],
+    "VOTING PROOF SUBMISSIONS":["ENVÍO DE PRUEBAS DE VOTACIÓN","ENVIO DE COMPROVANTES DE VOTAÇÃO"],
+    "Community participation project.":["Proyecto de participación comunitaria.","Projeto de participação da comunidade."],
+    "Voting proof collection for EN-COPA LATAM activities.":["Recopilación de pruebas de votación para las actividades de EN-COPA LATAM.","Coleta de comprovantes de votação das atividades da EN-COPA LATAM."],
+    "Made by EN-COPA LATAM.":["Creado por EN-COPA LATAM.","Feito pela EN-COPA LATAM."],
+    "Select your country…":["Selecciona tu país…","Selecione seu país…"],
+    "Enter the name of the voting campaign":["Escribe el nombre de la campaña de votación","Digite o nome da campanha de votação"],
+    "@yourusername":["@tuusuario","@seuusuario"],
+    "Please complete all fields":["Completa todos los campos","Preencha todos os campos"],
+    "Uploading…":["Subiendo…","Enviando…"],
+    "Submitted successfully":["Enviado correctamente","Enviado com sucesso"],
+    "Submission failed":["Error al enviar","Falha no envio"],
+    "Loading…":["Cargando…","Carregando…"],
+    "No submissions yet.":["Aún no hay envíos.","Ainda não há envios."],
+    "Updated":["Actualizado","Atualizado"],
+    "Could not load rankings. Please refresh.":["No se pudieron cargar los rankings. Actualiza la página.","Não foi possível carregar os rankings. Atualize a página."]
+  };
+  function applyLanguage(lang){
+    const idx=lang==="es"?0:lang==="pt"?1:-1;
+    if(idx<0) return;
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    let node;
+    while((node=walker.nextNode())){
+      const raw=node.nodeValue, key=raw.trim();
+      if(translations[key]){
+        const leading=raw.match(/^\\s*/)?.[0]||"", trailing=raw.match(/\\s*$/)?.[0]||"";
+        node.nodeValue=leading+translations[key][idx]+trailing;
+      }
+    }
+    const attrs=[["campaign-name","placeholder",["Escribe el nombre de la campaña de votación","Digite o nome da campanha de votação"]],["username","placeholder",["@tuusuario","@seuusuario"]],["language","aria-label",["Idioma","Idioma"]]];
+    attrs.forEach(([id,attr,values])=>{const el=$(id);if(el)el.setAttribute(attr,lang==="es"?values[0]:values[1]);});
+    document.documentElement.lang=lang;
+    if($("ranking-updated"))$("ranking-updated").textContent=lang==="es"?"Los rankings se actualizan automáticamente después de cada envío.":"Os rankings são atualizados automaticamente após cada envio.";
+  }
+  $("language")?.addEventListener("change",e=>applyLanguage(e.target.value));
+  const initialLanguage=localStorage.getItem("encopa-language")||"en";
+  if($("language")){$("language").value=initialLanguage;$("language").addEventListener("change",e=>localStorage.setItem("encopa-language",e.target.value));}
+  applyLanguage(initialLanguage);
   const codes = "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IS JE JM JO JP KE KG KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RW SA SB SC SD SE SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW".split(" ");
   const countryInput = $("country-search");
   const names = new Intl.DisplayNames(["en"], { type: "region" });
