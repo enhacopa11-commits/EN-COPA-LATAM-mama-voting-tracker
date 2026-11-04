@@ -16,9 +16,14 @@ function getSupabase() {
 
 function hammingDistance(a: string, b: string) {
   if (!/^[a-f0-9]{16}$/i.test(a) || !/^[a-f0-9]{16}$/i.test(b)) return 65;
-  let value = BigInt("0x" + a) ^ BigInt("0x" + b);
   let count = 0;
-  while (value) { count += Number(value & 1n); value >>= 1n; }
+  for (let i = 0; i < 16; i++) {
+    let value = parseInt(a[i], 16) ^ parseInt(b[i], 16);
+    while (value) {
+      count += value & 1;
+      value >>= 1;
+    }
+  }
   return count;
 }
 
