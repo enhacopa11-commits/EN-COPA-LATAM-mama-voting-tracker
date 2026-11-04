@@ -64,17 +64,26 @@ export async function POST(request: Request) {
     // Duplicate matching is advisory only: every uploaded image is still counted.
     const { data: existing, error: duplicateLookupError } = await supabase
       .from("proof_submissions")
-      .select("id,sha256,perceptual_hash")
+      .select("id,sha256,perceptual_hash,ocr_text")
       .limit(10000);
     if (duplicateLookupError) throw duplicateLookupError;
 
+    const normalizedOcr = ocrText.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
+    const ocrTokens = new Set(normalizedOcr.split(/\\s+/).filter(token => token.length > 2));
     const matches = (existing || []).flatMap(row => {
       const exact = row.sha256 === sha256;
       const visualDistance = perceptualHash && row.perceptual_hash
         ? hammingDistance(perceptualHash, row.perceptual_hash)
         : 65;
-      return exact || visualDistance <= 8
-        ? [{ id: row.id as string, kind: exact ? "exact" : "visual", distance: exact ? 0 : visualDistance }]
+      const priorText = String(row.ocr_text || "").toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
+      const priorTokens = new Set(priorText.split(/\\s+/).filter(token => token.length > 2));
+      let overlap = 0;
+      for (const token of ocrTokens) if (priorTokens.has(token)) overlap++;
+      const ocrSimilarity = ocrTokens.size && priorTokens.size
+        ? overlap / new Set([...ocrTokens, ...priorTokens]).size
+        : 0;
+      const kind = exact ? "exact" : visualDistance <= 8 ? "visual" : ocrSimilarity >= 0.82 && ocrTokens.size >= 8 ? "ocr" : null;
+      return kind ? [{ id: row.id as string, kind, distance: kind === "visual" ? visualDistance : 0 }]
         : [];
     }).slice(0, 30);
     const duplicateMatchIds = matches.map(match => match.id);
