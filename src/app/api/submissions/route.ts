@@ -87,6 +87,12 @@ export async function POST(request: Request) {
         : [];
     }).slice(0, 30);
     const duplicateMatchIds = matches.map(match => match.id);
+    if (duplicateMatchIds.length) {
+      const { error: flagError } = await supabase.from("proof_submissions")
+        .update({ duplicate_flag: true })
+        .in("id", duplicateMatchIds);
+      if (flagError) throw flagError;
+    }
 
     const id = randomUUID();
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
