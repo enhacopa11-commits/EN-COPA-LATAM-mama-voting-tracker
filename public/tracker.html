@@ -238,12 +238,13 @@
   };
   function applyLanguage(lang){
     const idx=lang==="es"?0:lang==="pt"?1:-1;
-    if(idx<0) return;
     const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
     let node;
     while((node=walker.nextNode())){
-      const raw=node.nodeValue, key=raw.trim();
-      if(translations[key]){
+      if(node.__encopaOriginal===undefined) node.__encopaOriginal=node.nodeValue;
+      const raw=node.__encopaOriginal, key=raw.trim();
+      if(lang==="en") node.nodeValue=raw;
+      else if(translations[key]){
         const leading=raw.match(/^\\s*/)?.[0]||"", trailing=raw.match(/\\s*$/)?.[0]||"";
         node.nodeValue=leading+translations[key][idx]+trailing;
       }
