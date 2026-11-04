@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const { id, status } = await request.json();
-    if (typeof id !== "string" || !["pending_review", "reviewed", "approved", "rejected"].includes(status)) {
+    if (typeof id !== "string" || !["pending_review", "counted", "rejected"].includes(status)) {
       return NextResponse.json({ error: "Invalid submission or status." }, { status: 400 });
     }
     const { data, error } = await db().from("proof_submissions")
