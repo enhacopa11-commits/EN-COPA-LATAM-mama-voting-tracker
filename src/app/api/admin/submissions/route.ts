@@ -46,3 +46,42 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Could not update this submission." }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  try {
+    const { id } = await request.json();
+    if (typeof id !== "string" || !id) {
+      return NextResponse.json({ error: "Invalid submission ID." }, { status: 400 });
+    }
+    const supabase = db();
+    const { data: submission, error: lookupError } = await supabase
+      .from("proof_submissions")
+      .select("id,storage_path,status")
+      .eq("id", id)
+      .single();
+    if (lookupError) throw lookupError;
+    if (submission.status !== "rejected") {
+      return NextResponse.json({ error: "Only rejected submissions can be permanently deleted. Reject counted submissions first." }, { status: 409 });
+    }
+
+    const { error: deleteRowError } = await supabase
+      .from("proof_submissions")
+      .delete()
+      .eq("id", id)
+      .eq("status", "rejected");
+    if (deleteRowError) throw deleteRowError;
+
+    const { error: storageError } = await supabase.storage
+      .from("certificates")
+      .remove([submission.storage_path]);
+    if (storageError) {
+      console.error("Submission row deleted but storage cleanup failed:", storageError);
+      return NextResponse.json({ ok: true, warning: "Record deleted, but the stored image could not be removed automatically." });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Admin submission delete error:", error);
+    return NextResponse.json({ error: "Could not delete this rejected submission." }, { status: 500 });
+  }
+}
