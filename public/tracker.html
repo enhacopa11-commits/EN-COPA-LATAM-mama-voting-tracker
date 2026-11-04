@@ -66,7 +66,7 @@
   <div class="app-shell">
    <header data-template-id="site-header" class="canva-header sticky top-0 z-30 border-b border-[#48617b66] bg-[#0B0F19]/95 backdrop-blur-xl" style="background: rgb(11, 15, 25);">
     <div class="site-width flex flex-wrap items-center justify-between gap-3 py-4"><a href="#top" class="flex items-center gap-3 no-underline text-white" aria-label="EN-COPA LATAM, inicio"> <img src="/EN%20COPA%20NEWS.png" alt="EN-COPA LATAM" class="h-12 w-12 rounded-xl object-contain" /> <span><strong data-template-id="header-brand" class="canva-text block tracking-[.09em]" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">EN-COPA LATAM</strong><span data-template-id="header-subtitle" class="canva-text block text-[10px] tracking-[.13em]" style="color: rgb(156, 163, 175); font-weight: 400; font-style: normal; font-size: 16px;">VOTING PROOF SUBMISSIONS</span></span> </a>
-     <nav aria-label="Sections" class="mobile-scroll order-3 flex w-full items-center gap-5 text-sm md:order-none md:w-auto"><a class="nav-link whitespace-nowrap" href="#submit">Submit proof</a></nav>
+     <nav aria-label="Sections" class="mobile-scroll order-3 flex w-full items-center gap-5 text-sm md:order-none md:w-auto"><a class="nav-link whitespace-nowrap" href="#submit">Submit proof</a><a class="nav-link whitespace-nowrap" href="#rankings">Rankings</a></nav>
      <div class="flex items-center gap-3"><span data-template-id="campaign-status" class="canva-tag hidden rounded-full border border-[#34D39966] bg-[#103b35] px-3 py-2 text-xs font-bold text-[#34D399] sm:inline-block" style="background: rgb(16, 59, 53); color: rgb(52, 211, 153); font-weight: 400; font-style: normal; font-size: 16px;">● ACTIVE CAMPAIGN · DEMO</span> <label for="language" class="sr-only">Idioma / Language / Idioma</label> <select id="language" aria-label="Idioma / Language / Idioma" class="field !w-auto !py-2 !pl-3 !pr-7 text-sm font-bold"><option value="es">ES</option><option value="en">EN</option><option value="pt">PT</option></select>
      </div>
     </div>
@@ -87,6 +87,21 @@
       <span class="absolute bottom-5 left-6 text-[10px] font-bold tracking-[.28em] text-white" style="z-index:1;text-shadow:0 1px 8px #000;">ENHYPEN</span>
       <span class="absolute right-6 top-5 text-[10px] tracking-[.2em] text-white" style="z-index:1;text-shadow:0 1px 8px #000;">01 — ∞</span>
      </div>
+    </section>
+    <section id="rankings" class="mb-16">
+     <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+      <div><p class="eyebrow mb-3">02 / LIVE LEADERBOARD</p><h2 class="heading text-3xl font-bold">LATAM RANKINGS</h2><p class="mt-2 text-sm text-[#9CA3AF]">Every submitted image adds one provisional point until reviewed.</p></div>
+      <button id="rankings-refresh" class="rounded-xl border border-[#50627c] px-4 py-3 text-sm font-bold text-white hover:bg-[#26364d]" type="button">Refresh rankings</button>
+     </div>
+     <div class="mb-5 grid gap-4 sm:grid-cols-2">
+      <div class="panel p-5"><p class="eyebrow">TOTAL PROOFS COUNTED</p><p id="ranking-total" class="mt-2 text-4xl font-bold text-[#34D399]">—</p><p class="small muted mt-1">Includes pending and approved submissions</p></div>
+      <div class="panel p-5"><p class="eyebrow">AWAITING REVIEW</p><p id="ranking-pending" class="mt-2 text-4xl font-bold text-[#fbbf24]">—</p><p class="small muted mt-1">Provisional points, subject to admin review</p></div>
+     </div>
+     <div class="grid gap-5 lg:grid-cols-2">
+      <div class="panel overflow-hidden"><div class="border-b border-[#40546e] p-5"><p class="eyebrow">INDIVIDUAL</p><h3 class="mt-1 text-xl font-bold">Participant ranking</h3></div><div class="table-wrap rounded-none border-0"><table style="min-width:360px"><thead><tr><th>#</th><th>X username</th><th>Country</th><th>Proofs</th></tr></thead><tbody id="individual-ranking"><tr><td colspan="4">Loading…</td></tr></tbody></table></div></div>
+      <div class="panel overflow-hidden"><div class="border-b border-[#40546e] p-5"><p class="eyebrow">BY COUNTRY</p><h3 class="mt-1 text-xl font-bold">Country ranking</h3></div><div class="table-wrap rounded-none border-0"><table style="min-width:300px"><thead><tr><th>#</th><th>Country</th><th>Proofs</th></tr></thead><tbody id="country-ranking"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
+     </div>
+     <p id="ranking-updated" class="mt-4 text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p>
     </section>
     <section id="submit" class="mb-16">
      <div class="canva-card panel overflow-visible" style="background: rgb(31, 41, 61);">
@@ -231,6 +246,37 @@
     }catch(error){setStatus("Submission failed","error");showMessage(error instanceof Error?error.message:"Could not submit proof.",true);}
     finally{busy=false;$("submit-button").disabled=false;$("screenshots").disabled=false;renderFiles();}
   });
+  const countryLabels = new Intl.DisplayNames(["en"], { type: "region" });
+  async function refreshRankings(){
+    const button=$("rankings-refresh");
+    if(button)button.disabled=true;
+    try{
+      const response=await fetch("/api/rankings",{cache:"no-store"});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||"Rankings unavailable");
+      $("ranking-total").textContent=Number(data.total||0).toLocaleString();
+      $("ranking-pending").textContent=Number(data.provisional||0).toLocaleString();
+      const individual=$("individual-ranking"),countries=$("country-ranking");
+      individual.replaceChildren();countries.replaceChildren();
+      (data.individual||[]).forEach(item=>{
+        const tr=document.createElement("tr");
+        [String(item.rank),"@"+item.username,item.country,Number(item.count).toLocaleString()].forEach(value=>{const td=document.createElement("td");td.textContent=value;tr.append(td);});
+        individual.append(tr);
+      });
+      (data.countries||[]).forEach(item=>{
+        const tr=document.createElement("tr");
+        [String(item.rank),(countryLabels.of(item.country)||item.country)+" · "+item.country,Number(item.count).toLocaleString()].forEach(value=>{const td=document.createElement("td");td.textContent=value;tr.append(td);});
+        countries.append(tr);
+      });
+      if(!individual.children.length)individual.innerHTML='<tr><td colspan="4">No submissions yet.</td></tr>';
+      if(!countries.children.length)countries.innerHTML='<tr><td colspan="3">No submissions yet.</td></tr>';
+      $("ranking-updated").textContent="Updated "+new Date().toLocaleTimeString();
+    }catch(error){$("ranking-updated").textContent="Could not load rankings. Please refresh.";}
+    finally{if(button)button.disabled=false;}
+  }
+  $("rankings-refresh")?.addEventListener("click",refreshRankings);
+  refreshRankings();
+  setInterval(refreshRankings,60000);
   window.addEventListener("beforeunload",()=>files.forEach(x=>URL.revokeObjectURL(x.url)));
 })();
 </script>
