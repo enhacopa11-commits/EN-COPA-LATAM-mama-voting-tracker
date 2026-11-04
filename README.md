@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Admin panel setup
+
+The private review panel is available at `/admin`. It uses one shared administrator password for the team.
+
+Configure these environment variables in the Vercel project before using the panel:
+
+- `ADMIN_PASSWORD`: create a strong password privately and share it only with the six administrators.
+- `ADMIN_SESSION_SECRET`: a separate random secret of at least 32 characters, used to sign 12-hour admin sessions.
+- `NEXT_PUBLIC_SUPABASE_URL`: the Supabase project URL.
+- `SUPABASE_SECRET_KEY`: the server-only Supabase secret key. Never expose this value in browser code or commit it to GitHub.
+
+After adding or changing environment variables, redeploy the Preview deployment. The panel uses the private `certificates` storage bucket and the `proof_submissions` table from the SQL migrations in `supabase/migrations`.
+
+Only approved proofs count toward the public country and participant rankings. Pending, reviewed, and rejected submissions are excluded.
