@@ -17,13 +17,17 @@ export async function GET() {
       .select("id,campaign_name,country_code,storage_path,original_filename,mime_type,size_bytes,status,created_at,sha256,perceptual_hash,ocr_text,duplicate_flag,duplicate_match_ids,rejection_reason,rejected_at,rejected_by,participants(x_username)")
       .order("created_at", { ascending: false }).limit(500);
     if (error) throw error;
+    const { data: audit, error: auditError } = await supabase.from("proof_submission_audit")
+      .select("id,submission_id,previous_status,new_status,reason,admin_actor,created_at")
+      .order("created_at", { ascending: false }).limit(500);
+    if (auditError) throw auditError;
     const rows = await Promise.all((data || []).map(async row => {
       const { data: signed, error: signedError } = await supabase.storage.from("certificates")
         .createSignedUrl(row.storage_path, 60 * 10);
       if (signedError) console.error("Could not sign proof image", signedError);
       return { ...row, image_url: signed?.signedUrl || null };
     }));
-    return NextResponse.json({ submissions: rows });
+    return NextResponse.json({ submissions: rows, audit: audit || [] });
   } catch (error) {
     console.error("Admin submissions error:", error);
     return NextResponse.json({ error: "Could not load submissions. Check that the latest proof-submission migration has been applied." }, { status: 500 });
