@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 
 export const maxDuration = 60;
 
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const storagePath = `${participant.id}/${id}.${extension}`;
     const bytes = Buffer.from(await file.arrayBuffer());
+    const imageSha256 = createHash("sha256").update(bytes).digest("hex");
 
     const stored = await supabase.storage.from("certificates").upload(storagePath, bytes, {
       contentType: file.type,
@@ -78,15 +79,19 @@ export async function POST(request: Request) {
       original_filename: file.name.slice(0, 255),
       mime_type: file.type,
       size_bytes: file.size,
-      status: "pending_review",
+      image_sha256: imageSha256,
+      status: "counted",
     }).select("id").single();
 
     if (saved.error) {
       await supabase.storage.from("certificates").remove([storagePath]);
+      if (saved.error.code === "23505") {
+        return NextResponse.json({ error: "This image has already been submitted. It was not counted again." }, { status: 409 });
+      }
       throw saved.error;
     }
 
-    return NextResponse.json({ ok: true, submissionId: saved.data.id, status: "pending_review" });
+    return NextResponse.json({ ok: true, submissionId: saved.data.id, status: "counted", counted: true });
   } catch (error) {
     console.error("Proof submission error:", error);
     return NextResponse.json({ error: "Could not save this proof. Please try again." }, { status: 500 });
