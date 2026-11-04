@@ -49,29 +49,43 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+  let stage = "initialization";
   try {
+    stage = "reading request";
     const { id } = await request.json();
     if (typeof id !== "string" || !id) {
       return NextResponse.json({ error: "Invalid submission ID." }, { status: 400 });
     }
+
+    stage = "connecting to Supabase";
     const supabase = db();
+
+    stage = "finding submission";
     const { data: submission, error: lookupError } = await supabase
       .from("proof_submissions")
       .select("id,storage_path,status")
       .eq("id", id)
       .single();
     if (lookupError) throw lookupError;
+
     if (submission.status !== "rejected") {
       return NextResponse.json({ error: "Only rejected submissions can be permanently deleted. Reject counted submissions first." }, { status: 409 });
     }
 
-    const { error: deleteRowError } = await supabase
+    stage = "deleting database record";
+    const { data: deletedRows, error: deleteRowError } = await supabase
       .from("proof_submissions")
       .delete()
       .eq("id", id)
-      .eq("status", "rejected");
+      .eq("status", "rejected")
+      .select("id");
     if (deleteRowError) throw deleteRowError;
+    if (!deletedRows?.length) {
+      return NextResponse.json({ error: "No record was deleted. Refresh the admin panel and try again." }, { status: 409 });
+    }
 
+    stage = "deleting image from Storage";
     const { error: storageError } = await supabase.storage
       .from("certificates")
       .remove([submission.storage_path]);
@@ -79,9 +93,13 @@ export async function DELETE(request: Request) {
       console.error("Submission row deleted but storage cleanup failed:", storageError);
       return NextResponse.json({ ok: true, warning: "Record deleted, but the stored image could not be removed automatically." });
     }
+
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Admin submission delete error:", error);
-    return NextResponse.json({ error: "Could not delete this rejected submission." }, { status: 500 });
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Admin submission delete error:", { stage, detail, error });
+    return NextResponse.json({
+      error: "Delete failed during: " + stage + ". " + detail,
+    }, { status: 500 });
   }
 }
