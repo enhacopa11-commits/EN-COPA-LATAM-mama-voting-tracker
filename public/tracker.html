@@ -149,228 +149,89 @@
   </div>
   <script>
 (() => {
-  const $=id=>document.getElementById(id);
-  const translations={
-    es:{nav:["Enviar prueba","Reto diario","Rankings"],search:"Buscar un país…",choose:"Elegir capturas",files:n=>`${n} imagen(es) seleccionada(s)`,available:"● Available",processing:"Processing",success:"Successfully submitted",error:"Error",missing:"Completa tu usuario de X, selecciona un país y añade al menos una imagen.",size:"Cada imagen original debe pesar 5 MB o menos.",type:"Solo se admiten imágenes PNG, JPG o WebP.",demo:""},
-    en:{nav:["Submit proof","Daily challenge","Rankings"],search:"Search for a country…",choose:"Choose screenshots",files:n=>`${n} image(s) selected`,available:"● Available",processing:"Processing",success:"Successfully submitted",error:"Error",missing:"Enter your X username, select a country and add at least one image.",size:"Each original image must be 5 MB or smaller.",type:"Only PNG, JPG or WebP images are accepted.",demo:""},
-    pt:{nav:["Enviar comprovante","Desafio diário","Rankings"],search:"Buscar um país…",choose:"Escolher capturas",files:n=>`${n} imagem(ns) selecionada(s)`,available:"● Available",processing:"Processing",success:"Successfully submitted",error:"Error",missing:"Informe seu usuário do X, selecione um país e adicione ao menos uma imagem.",size:"Cada imagem original deve ter no máximo 5 MB.",type:"Apenas imagens PNG, JPG ou WebP são aceitas.",demo:""}
-  };
-  let lang="es",selectedCountry="",files=[],busy=false,formState="available";
-  const codes=("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RW SA SB SC SD SE SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(" ");
+  const $ = id => document.getElementById(id);
+  const codes = "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IS JE JM JO JP KE KG KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RW SA SB SC SD SE SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW".split(" ");
   const countryInput = $("country-search");
-  const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
-  const sortedCountries = [...codes].sort((a,b) => (countryNames.of(a)||a).localeCompare(countryNames.of(b)||b,"en"));
-  sortedCountries.forEach(code => {
-    const option = document.createElement("option");
-    option.value = code;
-    option.textContent = `${countryNames.of(code)||code} · ${code}`;
+  const names = new Intl.DisplayNames(["en"], { type: "region" });
+  codes.sort((a,b) => (names.of(a)||a).localeCompare(names.of(b)||b,"en")).forEach(code => {
+    const option=document.createElement("option");
+    option.value=code; option.textContent=(names.of(code)||code)+" · "+code;
     countryInput.append(option);
   });
-  countryInput.addEventListener("change", () => { selectedCountry = countryInput.value; });
   const mime=["image/png","image/jpeg","image/webp"];
-  function status(state){formState=state;const el=$("form-status");el.className="status "+state;el.replaceChildren();if(state==="processing"){const s=document.createElement("span");s.className="spinner";el.append(s)}el.append(document.createTextNode(" "+({available:translations[lang].available,processing:translations[lang].processing,success:translations[lang].success,error:translations[lang].error,disabled:"Disabled"}[state])))}
-  function message(text,isError=false){const el=$("submit-message");el.textContent=text;el.style.color=isError?"#ffb4b4":"#d1e8f0"}
-  function renderFiles(){const list=$("preview-list");list.replaceChildren();files.forEach(item=>{const box=document.createElement("div");box.className="thumb";const im=document.createElement("img");im.src=item.url;im.alt=`Preview: ${item.file.name}`;const remove=document.createElement("button");remove.type="button";remove.setAttribute("aria-label",`Remove ${item.file.name}`);remove.textContent="×";remove.disabled=busy;remove.addEventListener("click",()=>{URL.revokeObjectURL(item.url);files=files.filter(x=>x.id!==item.id);renderFiles();status("available");message("")});box.append(im,remove);list.append(box)});$("file-count").textContent=translations[lang].files(files.length)}
-  function addFiles(list){let issue="";for(const file of list){if(!mime.includes(file.type)){issue=translations[lang].type;continue}if(file.size>5*1024*1024){issue=translations[lang].size;continue}files.push({id:crypto.randomUUID(),file,url:URL.createObjectURL(file)})}renderFiles();if(issue){status("error");message(issue,true)}else if(files.length){status("available");message("")}}
-  $("screenshots").addEventListener("change",e=>{addFiles([...e.target.files]);e.target.value=""});
-  const drop=$("drop-zone");drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("dragging")});drop.addEventListener("dragleave",()=>drop.classList.remove("dragging"));drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("dragging");addFiles([...e.dataTransfer.files])});
-  async function compressScreenshot(file){
+  let files=[],busy=false;
+  function setStatus(label,kind="available"){const el=$("form-status");el.className="status "+kind;el.textContent=label;}
+  function showMessage(value,error=false){$("submit-message").textContent=value;$("submit-message").style.color=error?"#ffb4b4":"#d1e8f0";}
+  function renderFiles(){
+    const list=$("preview-list");list.replaceChildren();
+    files.forEach(item=>{
+      const box=document.createElement("div");box.className="thumb";
+      const img=document.createElement("img");img.src=item.url;img.alt="Preview: "+item.file.name;
+      const remove=document.createElement("button");remove.type="button";remove.textContent="×";remove.setAttribute("aria-label","Remove "+item.file.name);remove.disabled=busy;
+      remove.addEventListener("click",()=>{URL.revokeObjectURL(item.url);files=files.filter(x=>x.id!==item.id);renderFiles();});
+      box.append(img,remove);list.append(box);
+    });
+    $("file-count").textContent=files.length+" image(s) selected";
+  }
+  function addFiles(incoming){
+    const errors=[];
+    for(const file of incoming){
+      if(!mime.includes(file.type)){errors.push(file.name+": unsupported format");continue;}
+      if(!file.size||file.size>5*1024*1024){errors.push(file.name+": maximum size is 5 MB");continue;}
+      files.push({id:crypto.randomUUID(),file,url:URL.createObjectURL(file)});
+    }
+    renderFiles();
+    if(errors.length)showMessage(errors.join("\n"),true);else showMessage("");
+  }
+  $("screenshots").addEventListener("change",e=>{addFiles([...e.target.files]);e.target.value="";});
+  const drop=$("drop-zone");
+  drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("dragging");});
+  drop.addEventListener("dragleave",()=>drop.classList.remove("dragging"));
+  drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("dragging");addFiles([...e.dataTransfer.files]);});
+  async function compressImage(file){
     try{
       const bitmap=await createImageBitmap(file);
       const scale=Math.min(1,2200/Math.max(bitmap.width,bitmap.height));
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(bitmap.width*scale));
-      canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-      const context=canvas.getContext("2d");
-      if(!context){bitmap.close();return file}
-      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
-      bitmap.close();
+      const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+      const ctx=canvas.getContext("2d");if(!ctx){bitmap.close();return file;}
+      ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.86));
       if(!blob||blob.size>=file.size)return file;
       return new File([blob],file.name.replace(/\.(png|webp)$/i,".jpg"),{type:"image/jpeg",lastModified:Date.now()});
-    }catch(error){console.warn("Screenshot compression skipped:",error);return file}
+    }catch(error){console.warn("Image compression skipped",error);return file;}
   }
-
-  $("proof-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    if(busy)return;
-    const username=$("username").value.trim();
-    if(!/^@?[A-Za-z0-9_]{1,15}$/.test(username)||!selectedCountry||!files.length){
-      status("error");message(translations[lang].missing,true);return;
+  $("proof-form").addEventListener("submit",async e=>{
+    e.preventDefault();if(busy)return;
+    const campaign=$("campaign-name").value.trim();
+    const username=$("username").value.trim().replace(/^@/,"");
+    const countryCode=countryInput.value;
+    if(campaign.length<2||campaign.length>120||!/^[A-Za-z0-9_]{1,15}$/.test(username)||!countryCode||!files.length){
+      setStatus("Please complete all fields","error");
+      showMessage("Enter the voting/campaign name, a valid X username, your country, and at least one image.",true);return;
     }
-    busy=true;
-    $("submit-button").disabled=true;
-    $("screenshots").disabled=true;
-    status("processing");
+    busy=true;$("submit-button").disabled=true;$("screenshots").disabled=true;setStatus("Uploading…","processing");renderFiles();
     const total=files.length,results=[];
-    renderFiles();
     try{
-      for(let index=0;index<total;index++){
-        const item=files[index];
-        message(`Preparing and uploading screenshot ${index+1} of ${total}...`);
-        const uploadFile=await compressScreenshot(item.file);
-        const body=new FormData();
-        body.append("username",username);
-        body.append("countryCode",selectedCountry);
-        body.append("screenshots",uploadFile,uploadFile.name);
-        try{
-          const response=await fetch("/api/submissions",{method:"POST",body});
-          const payload=await response.json();
-          if(!response.ok)throw new Error(payload.error||"Submission failed.");
-          results.push(...(payload.results||[]));
-        }catch(error){
-          results.push({filename:item.file.name,status:"rejected",message:error instanceof Error?error.message:"Upload failed."});
-        }
+      for(let i=0;i<total;i++){
+        const item=files[i];showMessage("Uploading image "+(i+1)+" of "+total+"…");
+        const uploadFile=await compressImage(item.file);
+        const body=new FormData();body.append("campaignName",campaign);body.append("username",username);body.append("countryCode",countryCode);body.append("screenshots",uploadFile,uploadFile.name);
+        try{const response=await fetch("/api/submissions",{method:"POST",body});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Upload failed");results.push({id:item.id,status:"saved"});}
+        catch(error){results.push({id:item.id,status:"failed",message:error instanceof Error?error.message:"Upload failed"});}
       }
-      const accepted=results.filter(x=>x.status==="verified").length;
-      const details=results.map(x=>`${x.filename}: ${x.message}`).join("\n");
-      message(`Processed ${results.length} of ${total} image(s). ${accepted} provisionally counted; ${results.length-accepted} not counted.\n${details}`);
-      status(accepted>0?"success":"error");
-      files.forEach(item=>URL.revokeObjectURL(item.url));
-      files=[];
+      const saved=results.filter(x=>x.status==="saved").length;
+      const failed=results.filter(x=>x.status!=="saved");
+      showMessage("Saved "+saved+" of "+total+" image(s)."+(failed.length?"\n"+failed.length+" image(s) could not be saved. Please try those again.":""));
+      setStatus(saved===total?"Submitted successfully":saved?"Partially submitted":"Submission failed",saved?"success":"error");
+      const savedIds=new Set(results.filter(x=>x.status==="saved").map(x=>x.id));
+      files.forEach(x=>{if(savedIds.has(x.id))URL.revokeObjectURL(x.url);});
+      files=files.filter(x=>!savedIds.has(x.id));
+      if(saved===total){$("proof-form").reset();}
       renderFiles();
-      $("proof-form").reset();
-      selectedCountry="";
-      await loadRankings();
-      await loadCollabMission();
-    }catch(error){
-      status("error");message(error instanceof Error?error.message:"Submission failed.",true);
-    }finally{
-      busy=false;
-      $("submit-button").disabled=false;
-      $("screenshots").disabled=false;
-      renderFiles();
-    }
+    }catch(error){setStatus("Submission failed","error");showMessage(error instanceof Error?error.message:"Could not submit proof.",true);}
+    finally{busy=false;$("submit-button").disabled=false;$("screenshots").disabled=false;renderFiles();}
   });
-
-  function setTab(buttonA,buttonB,panelA,panelB,second){$(buttonA).setAttribute("aria-selected",String(!second));$(buttonB).setAttribute("aria-selected",String(second));$(panelA).classList.toggle("hidden",second);$(panelB).classList.toggle("hidden",!second)}
-  $("today-tab").onclick=()=>setTab("today-tab","history-tab","today-view","history-view",false);
-  $("history-tab").onclick=()=>setTab("today-tab","history-tab","today-view","history-view",true);
-  const kst=new Date(Date.now()+9*3600000),fmt=d=>new Intl.DateTimeFormat("en-US",{timeZone:"UTC",year:"numeric",month:"short",day:"numeric"}).format(d);
-  $("kst-date").textContent=`${fmt(kst)} · Korea Standard Time (KST)`;
-
-  async function loadCollabMission() {
-    const body = $("collab-ranking");
-    try {
-      const response = await fetch("/api/collab-mission", { cache: "no-store" });
-      if (!response.ok) throw new Error("Could not load collaboration mission.");
-      const data = await response.json();
-      const fmt = n => Number(n || 0).toLocaleString();
-      $("collab-mnet-total").textContent = fmt(data.totals.mnet_plus);
-      $("collab-mma-total").textContent = fmt(data.totals.mma);
-      $("collab-mnet-percent").textContent = Math.round(data.progress.mnet_plus) + "%";
-      $("collab-mma-percent").textContent = Math.round(data.progress.mma) + "%";
-      $("collab-mnet-bar").style.width = data.progress.mnet_plus + "%";
-      $("collab-mma-bar").style.width = data.progress.mma + "%";
-      $("collab-date").textContent = data.dateKST + " · Korea Standard Time";
-      $("collab-participants").textContent = fmt(data.totalParticipants) + " participants today";
-      body.replaceChildren();
-      if (!data.ranking.length) {
-        const tr = document.createElement("tr"), td = document.createElement("td");
-        td.colSpan = 3; td.className = "py-5 text-slate-400"; td.textContent = "No contributions yet. Be the first!";
-        tr.append(td); body.append(tr); return;
-      }
-      data.ranking.forEach((user, i) => {
-        const tr = document.createElement("tr");
-        const name = document.createElement("td"); name.className = "py-3 pr-2";
-        name.textContent = (i + 1) + ". @" + user.username;
-        const country = document.createElement("span"); country.className = "block text-xs text-slate-500"; country.textContent = user.countryCode;
-        name.append(country);
-        const mnet = document.createElement("td"); mnet.className = "py-3 pr-2"; mnet.textContent = fmt(user.mnetPlusVotes);
-        const mma = document.createElement("td"); mma.className = "py-3"; mma.textContent = fmt(user.mmaVotes);
-        tr.append(name,mnet,mma); body.append(tr);
-      });
-    } catch (error) {
-      console.error(error);
-      body.innerHTML = '<tr><td colspan="3" class="py-5 text-rose-300">Could not load collaboration data.</td></tr>';
-    }
-  }
-
-  async function loadRankings() {
-    try {
-      const response = await fetch("/api/rankings", { cache: "no-store" });
-      if (!response.ok) throw new Error("Rankings unavailable");
-      const data = await response.json();
-
-      const countryName = code => {
-        try { return new Intl.DisplayNames([{es:"es-419",en:"en",pt:"pt-BR"}[lang]], {type:"region"}).of(code) || code; }
-        catch { return code; }
-      };
-
-      const countryRows = $("country-rows");
-      countryRows.replaceChildren();
-      const countries = data.countries[countryPeriod] || [];
-      countries.forEach((item, i) => {
-        const tr = document.createElement("tr");
-        td(tr, String(i + 1), "rank");
-        td(tr, countryName(item.countryCode));
-        td(tr, String(item[countryPeriod] || 0));
-        td(tr, "—");
-        td(tr, "Real submissions", "move-flat");
-        countryRows.append(tr);
-      });
-
-      const userRows = $("user-rows");
-      userRows.replaceChildren();
-      const users = data.users[userPeriod] || [];
-      users.forEach((item, i) => {
-        const tr = document.createElement("tr");
-        td(tr, String(i + 1), "rank");
-        const name = td(tr, "@" + item.username);
-        const sub = document.createElement("div");
-        sub.className = "muted mt-1 text-xs";
-        sub.textContent = countryName(item.countryCode);
-        name.append(sub);
-        td(tr, String(item[userPeriod] || 0));
-        td(tr, "—");
-        td(tr, "Real submissions", "move-flat");
-        userRows.append(tr);
-      });
-
-      if (!countries.length) {
-        const tr = document.createElement("tr");
-        const cell = td(tr, "No real submissions yet.");
-        cell.colSpan = 5;
-        countryRows.append(tr);
-      }
-      if (!users.length) {
-        const tr = document.createElement("tr");
-        const cell = td(tr, "No real participants yet.");
-        cell.colSpan = 5;
-        userRows.append(tr);
-      }
-
-      $("history-list").replaceChildren();
-      const card = document.createElement("div");
-      card.className = "rounded-xl border border-[#45627d] bg-[#142338] p-5";
-      const title = document.createElement("p");
-      title.className = "font-bold";
-      title.textContent = `${data.dateKST} · KST`;
-      const sub = document.createElement("p");
-      sub.className = "muted mt-2 text-sm";
-      sub.textContent = `${data.totalToday} eligible submissions today`;
-      card.append(title, sub);
-      $("history-list").append(card);
-    } catch (error) {
-      console.error(error);
-      message("Could not load live rankings.", true);
-    }
-  }
-
-  const countryData = [];
-  const fakeUsers = [];
-  const movements = [];
-  const movementText = {up:"↑ Moved up",down:"↓ Moved down",flat:"– Unchanged",new:"NEW First appearance"};
-
-  let countryPeriod="daily",userPeriod="daily";
-  function td(row,text,cls=""){const c=document.createElement("td");c.textContent=text;c.className=cls;row.append(c);return c}
-  function drawCountry(){ loadRankings(); }
-  function drawUsers(){ loadRankings(); }
-
-  for(const kind of ["country","user"])for(const period of ["daily","overall"]){$(kind+"-"+period).onclick=()=>{if(kind==="country"){countryPeriod=period;drawCountry()}else{userPeriod=period;drawUsers()}$(kind+"-daily").setAttribute("aria-selected",String(period==="daily"));$(kind+"-overall").setAttribute("aria-selected",String(period==="overall"))}}
-  $("language").addEventListener("change",e=>{lang=e.target.value;document.documentElement.lang=lang==="pt"?"pt-BR":lang==="es"?"es-419":"en";["submit","challenge","ranking"].forEach((name,i)=>{$("nav-"+name).textContent=translations[lang].nav[i]});if(selectedCountry)countryInput.value=selectedCountry;$("file-count").textContent=translations[lang].files(files.length);status(formState);drawCountry();drawUsers()});
-  loadRankings();\n  loadCollabMission();
-  window.addEventListener("beforeunload",()=>files.forEach(item=>URL.revokeObjectURL(item.url)));
+  window.addEventListener("beforeunload",()=>files.forEach(x=>URL.revokeObjectURL(x.url)));
 })();
 </script>
  
