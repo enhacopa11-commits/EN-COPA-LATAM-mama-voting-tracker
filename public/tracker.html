@@ -88,20 +88,32 @@
       <span class="absolute right-6 top-5 text-[10px] tracking-[.2em] text-white" style="z-index:1;text-shadow:0 1px 8px #000;">01 — ∞</span>
      </div>
     </section>
-    <section id="rankings" class="mb-16">
-     <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
-      <div><p class="eyebrow mb-3">02 / LIVE LEADERBOARD</p><h2 class="heading text-3xl font-bold">LATAM RANKINGS</h2><p class="mt-2 text-sm text-[#9CA3AF]">Every submitted image adds one provisional point until reviewed.</p></div>
-      <button id="rankings-refresh" class="rounded-xl border border-[#50627c] px-4 py-3 text-sm font-bold text-white hover:bg-[#26364d]" type="button">Refresh rankings</button>
+    <section id="rankings" class="mb-20">
+     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div><p class="eyebrow mb-3">02 / LIVE LEADERBOARD</p><h2 class="heading text-4xl font-bold tracking-tight">THE LATAM RACE</h2><p class="mt-2 max-w-xl text-sm leading-relaxed text-[#becbd8]">Every submitted proof moves the board. Follow the individual and country rankings in real time.</p></div>
+      <button id="rankings-refresh" class="rounded-xl border border-[#5c718d] bg-[#17283d] px-5 py-3 text-sm font-bold text-white transition hover:border-[#34D399] hover:bg-[#203951]" type="button">↻ Refresh rankings</button>
      </div>
-     <div class="mb-5 grid gap-4 sm:grid-cols-2">
-      <div class="panel p-5"><p class="eyebrow">TOTAL PROOFS COUNTED</p><p id="ranking-total" class="mt-2 text-4xl font-bold text-[#34D399]">—</p><p class="small muted mt-1">Includes pending and approved submissions</p></div>
-      <div class="panel p-5"><p class="eyebrow">AWAITING REVIEW</p><p id="ranking-pending" class="mt-2 text-4xl font-bold text-[#fbbf24]">—</p><p class="small muted mt-1">Provisional points, subject to admin review</p></div>
+     <div class="mb-6 grid gap-4 sm:grid-cols-2">
+      <div class="relative overflow-hidden rounded-2xl border border-[#34d39955] bg-gradient-to-br from-[#123b3c] via-[#17344a] to-[#172338] p-6 shadow-[0_18px_50px_#02081766]">
+       <div class="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-[#6ee7b755]"></div><div class="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-[#6ee7b733]"></div>
+       <p class="eyebrow relative">TOTAL PROOFS COUNTED</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-total" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#34d39955] bg-[#0d4b3d99] px-3 py-1 text-[10px] font-bold tracking-widest text-[#6ee7b7]">LIVE</span></div><p class="relative mt-2 text-xs text-[#b7d5d8]">Pending and approved submissions</p>
+      </div>
+      <div class="relative overflow-hidden rounded-2xl border border-[#fbbf2455] bg-gradient-to-br from-[#49351e] via-[#332d35] to-[#172338] p-6 shadow-[0_18px_50px_#02081766]">
+       <div class="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-[#fbbf2455]"></div><div class="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-[#fbbf2433]"></div>
+       <p class="eyebrow relative" style="color:#fbbf24">AWAITING REVIEW</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-pending" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#fbbf2455] bg-[#6b4a1c66] px-3 py-1 text-[10px] font-bold tracking-widest text-[#fcd34d]">PENDING</span></div><p class="relative mt-2 text-xs text-[#e5c99c]">Provisional points, subject to admin review</p>
+      </div>
      </div>
-     <div class="grid gap-5 lg:grid-cols-2">
-      <div class="panel overflow-hidden"><div class="border-b border-[#40546e] p-5"><p class="eyebrow">INDIVIDUAL</p><h3 class="mt-1 text-xl font-bold">Participant ranking</h3></div><div class="table-wrap rounded-none border-0"><table style="min-width:360px"><thead><tr><th>#</th><th>X username</th><th>Country</th><th>Proofs</th></tr></thead><tbody id="individual-ranking"><tr><td colspan="4">Loading…</td></tr></tbody></table></div></div>
-      <div class="panel overflow-hidden"><div class="border-b border-[#40546e] p-5"><p class="eyebrow">BY COUNTRY</p><h3 class="mt-1 text-xl font-bold">Country ranking</h3></div><div class="table-wrap rounded-none border-0"><table style="min-width:300px"><thead><tr><th>#</th><th>Country</th><th>Proofs</th></tr></thead><tbody id="country-ranking"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
+     <div class="grid gap-6 xl:grid-cols-2">
+      <article class="panel min-w-0 overflow-hidden border-[#4b6682] bg-gradient-to-b from-[#1c2b42] to-[#111d2e]">
+       <div class="flex items-center justify-between border-b border-[#40546e] px-6 py-5"><div><p class="eyebrow">THE PLAYERS</p><h3 class="heading mt-1 text-2xl font-bold">Individual ranking</h3></div><span class="rounded-lg border border-[#4f7390] bg-[#132b40] px-3 py-2 text-[10px] font-bold tracking-widest text-[#9dd9e7]">TOP PLAYERS</span></div>
+       <div class="table-wrap rounded-none border-0"><table style="min-width:360px"><thead><tr><th>RANK</th><th>ENGENE / X</th><th>COUNTRY</th><th>PROOFS</th></tr></thead><tbody id="individual-ranking"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
+      </article>
+      <article class="panel min-w-0 overflow-hidden border-[#4b6682] bg-gradient-to-b from-[#1c2b42] to-[#111d2e]">
+       <div class="flex items-center justify-between border-b border-[#40546e] px-6 py-5"><div><p class="eyebrow">THE TEAMS</p><h3 class="heading mt-1 text-2xl font-bold">Country ranking</h3></div><span class="rounded-lg border border-[#4f7390] bg-[#132b40] px-3 py-2 text-[10px] font-bold tracking-widest text-[#9dd9e7]">COUNTRY RACE</span></div>
+       <div class="table-wrap rounded-none border-0"><table style="min-width:300px"><thead><tr><th>RANK</th><th>COUNTRY</th><th>PROOFS</th></tr></thead><tbody id="country-ranking"><tr><td colspan="3">Loading…</td></tr></tbody></table></div>
+      </article>
      </div>
-     <p id="ranking-updated" class="mt-4 text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p>
+     <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#40546e] bg-[#111d2e] px-5 py-4"><p class="text-xs text-[#a9b9ca]"><span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#34D399]"></span>Provisional points count immediately and are removed if a proof is rejected.</p><p id="ranking-updated" class="text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p></div>
     </section>
     <section id="submit" class="mb-16">
      <div class="canva-card panel overflow-visible" style="background: rgb(31, 41, 61);">
