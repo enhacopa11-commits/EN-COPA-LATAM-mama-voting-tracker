@@ -110,7 +110,7 @@
       </article>
       <article class="panel min-w-0 overflow-hidden border-[#4b6682] bg-gradient-to-b from-[#1c2b42] to-[#111d2e]">
        <div class="flex items-center justify-between border-b border-[#40546e] px-6 py-5"><div><p class="eyebrow">THE TEAMS</p><h3 class="heading mt-1 text-2xl font-bold">Country ranking</h3></div><span class="rounded-lg border border-[#4f7390] bg-[#132b40] px-3 py-2 text-[10px] font-bold tracking-widest text-[#9dd9e7]">COUNTRY RACE</span></div>
-       <div class="table-wrap rounded-none border-0"><table style="min-width:300px"><thead><tr><th>RANK</th><th>COUNTRY</th><th>PROOFS</th></tr></thead><tbody id="country-ranking"><tr><td colspan="3">Loading…</td></tr></tbody></table></div>
+       <div class="table-wrap rounded-none border-0"><table style="min-width:300px"><tbody id="country-ranking"><tr><td>Loading…</td></tr></tbody></table></div>
       </article>
      </div>
      <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#40546e] bg-[#111d2e] px-5 py-4"><p class="text-xs text-[#a9b9ca]"><span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#34D399]"></span>Provisional points count immediately and are removed if a proof is rejected.</p><p id="ranking-updated" class="text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p></div>
@@ -278,8 +278,15 @@
       });
       (data.countries||[]).forEach(item=>{
         const tr=document.createElement("tr");
-        [String(item.rank),(countryLabels.of(item.country)||item.country)+" · "+item.country,Number(item.count).toLocaleString()].forEach(value=>{const td=document.createElement("td");td.textContent=value;tr.append(td);});
-        countries.append(tr);
+        const cell=document.createElement("td");cell.colSpan=3;cell.style.padding="10px 12px";
+        const wrap=document.createElement("div");wrap.className="rounded-xl border border-[#526b89]/40 bg-[#17283d]/70 p-3";
+        const top=document.createElement("div");top.className="mb-2 flex items-center justify-between gap-3 text-sm";
+        const name=document.createElement("span");name.className="font-semibold text-white";name.textContent="#"+item.rank+"  "+(countryLabels.of(item.country)||item.country)+" ↑";
+        const pct=document.createElement("span");pct.className="font-bold text-[#c4a5ff]";pct.textContent=Number(item.percentage||0).toFixed(2)+"%";
+        top.append(name,pct);
+        const track=document.createElement("div");track.className="h-2.5 overflow-hidden rounded-full bg-[#334155]";
+        const bar=document.createElement("div");bar.className="h-full rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#34d399]";bar.style.width=Math.max(0,Math.min(100,Number(item.percentage||0)))+"%";
+        track.append(bar);wrap.append(top,track);cell.append(wrap);tr.append(cell);countries.append(tr);
       });
       if(!individual.children.length)individual.innerHTML='<tr><td colspan="4">No submissions yet.</td></tr>';
       if(!countries.children.length)countries.innerHTML='<tr><td colspan="3">No submissions yet.</td></tr>';
