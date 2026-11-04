@@ -10,8 +10,8 @@ export async function GET() {
     const supabase = createClient(url, key);
     const { data, error } = await supabase
       .from("proof_submissions")
-      .select("participant_id,country_code,status,participants(x_username)")
-      .neq("status", "rejected")
+      .select("participant_id,country_code,status,duplicate_flag,participants(x_username)")
+      .eq("status", "counted")
       .order("created_at", { ascending: false })
       .limit(10000);
     if (error) throw error;
@@ -37,10 +37,9 @@ export async function GET() {
       .map((item, index) => ({ rank: index + 1, ...item }));
 
     return NextResponse.json({
-      individual,
-      countries: byCountry,
-      total: (data || []).length,
-      provisional: (data || []).filter(row => row.status === "pending_review").length,
+      individual, countries: byCountry, total: (data || []).length,
+      provisional: 0,
+      duplicateFlags: (data || []).filter(row => row.duplicate_flag).length,
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Public rankings error:", error);
