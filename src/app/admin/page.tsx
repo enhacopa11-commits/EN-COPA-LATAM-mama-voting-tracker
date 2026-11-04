@@ -66,6 +66,26 @@ export default function AdminPage() {
     finally { setBusyId(""); }
   }
 
+  async function deleteRejected(id: string) {
+    if (!window.confirm("Permanently delete this rejected submission and its image? This cannot be undone.")) return;
+    setBusyId(id); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/admin/submissions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not delete submission.");
+      setItems(current => current.filter(item => item.id !== id));
+      setNotice(data.warning || "Rejected submission and image deleted.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not delete submission.");
+    } finally {
+      setBusyId("");
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthenticated(false); setItems([]);
@@ -117,6 +137,7 @@ export default function AdminPage() {
                   <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"rejected")} className="rounded-lg bg-rose-500 px-3 py-2 text-sm font-bold text-white disabled:opacity-50">Reject</button>
                   
                   <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"pending_review")} className="rounded-lg border border-slate-500 px-3 py-2 text-sm disabled:opacity-50">Pending</button>
+                  {item.status === "rejected" && <button disabled={busyId===item.id} onClick={()=>void deleteRejected(item.id)} className="rounded-lg border border-rose-500 px-3 py-2 text-sm font-bold text-rose-300 disabled:opacity-50">Delete permanently</button>}
                 </div>
               </div>
             </article>;
