@@ -124,7 +124,7 @@ export default function AdminPage() {
                 <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="text-lg font-bold">{item.campaign_name}</h2><span className={`rounded-full px-3 py-1 text-xs ${item.status==="counted"?"bg-emerald-900 text-emerald-200":"bg-rose-900 text-rose-200"}`}>{statusLabels[item.status]}</span></div>
                 <p className="text-sm text-slate-300">@{participant?.x_username || "Unknown"} · {item.country_code}</p>
                 <p className="text-xs text-slate-500">{new Date(item.created_at).toLocaleString()} · {item.original_filename || "image"} · {(item.size_bytes/1024/1024).toFixed(2)} MB</p>
-                {item.duplicate_flag && <div className="rounded-lg border border-amber-500/50 bg-amber-950/40 p-3 text-sm text-amber-200"><strong>Possible duplicate</strong><p className="mt-1">{item.duplicate_match_ids?.length || 0} similar image(s) found by exact hash or perceptual comparison. Review manually; this image is still counted.</p></div>}
+                {item.duplicate_flag && <div className="rounded-lg border border-amber-500/50 bg-amber-950/40 p-3 text-sm text-amber-200"><strong>Possible duplicate</strong><p className="mt-1">A matching image was detected through exact file hash, visual similarity, or OCR text. Review manually; this image is still counted.</p></div>}
                 {item.perceptual_hash && <p className="text-[11px] text-slate-500">pHash: {item.perceptual_hash}</p>}
                 {item.rejection_reason && <p className="text-xs text-rose-300">Rejected by {item.rejected_by || "admin"} · {item.rejection_reason}</p>}
                 <div className="flex flex-wrap gap-2 pt-2">
