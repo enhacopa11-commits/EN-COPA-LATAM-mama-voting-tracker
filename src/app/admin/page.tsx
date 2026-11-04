@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+type AuditEntry = { id: string; submission_id: string; previous_status: string; new_status: string; reason: string | null; admin_actor: string; created_at: string };
 type Submission = {
   id: string; campaign_name: string; country_code: string; storage_path: string;
   original_filename: string | null; mime_type: string; size_bytes: number;
@@ -18,6 +19,7 @@ export default function AdminPage() {
   const [adminName, setAdminName] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [items, setItems] = useState<Submission[]>([]);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [filter, setFilter] = useState("duplicates");
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState("");
@@ -31,7 +33,7 @@ export default function AdminPage() {
       const data = await response.json();
       if (response.status === 401) { setAuthenticated(false); return; }
       if (!response.ok) throw new Error(data.error || "Could not load submissions.");
-      setItems(data.submissions || []); setAuthenticated(true);
+      setItems(data.submissions || []); setAudit(data.audit || []); setAuthenticated(true);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not load submissions."); }
     finally { setLoading(false); }
   }, []);
@@ -132,6 +134,10 @@ export default function AdminPage() {
             </article>;
           })}
         </div>
+        <section className="mt-10 overflow-hidden rounded-2xl border border-slate-700 bg-[#1f293d]">
+          <div className="border-b border-slate-700 px-5 py-4"><h2 className="text-lg font-bold">Moderation history</h2><p className="text-xs text-slate-400">Every count/rejection action, reviewer and timestamp.</p></div>
+          {audit.length===0 ? <p className="p-5 text-sm text-slate-400">No moderation actions recorded yet.</p> : <div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-slate-400"><tr><th className="p-3">DATE</th><th className="p-3">ADMIN</th><th className="p-3">IMAGE ID</th><th className="p-3">ACTION</th><th className="p-3">REASON</th></tr></thead><tbody>{audit.map(entry=><tr key={entry.id} className="border-t border-slate-700"><td className="p-3">{new Date(entry.created_at).toLocaleString()}</td><td className="p-3">{entry.admin_actor}</td><td className="p-3 font-mono">{entry.submission_id.slice(0,8)}</td><td className="p-3">{entry.previous_status} → {entry.new_status}</td><td className="p-3">{entry.reason || "—"}</td></tr>)}</tbody></table></div>}
+        </section>
         {error && <p role="alert" className="mt-6 text-sm text-rose-300">{error}</p>}
         {notice && <p role="status" className="mt-6 text-sm text-emerald-300">{notice}</p>}
       </>}
