@@ -10,14 +10,14 @@ type Submission = {
   original_filename: string | null;
   mime_type: string;
   size_bytes: number;
-  status: "pending_review" | "reviewed" | "approved" | "rejected";
+  status: "pending_review" | "counted" | "rejected";
   created_at: string;
   image_url: string | null;
   participants: { x_username: string } | { x_username: string }[] | null;
 };
 
 const statusLabels: Record<Submission["status"], string> = {
-  pending_review: "Pending review", reviewed: "Reviewed", approved: "Approved", rejected: "Rejected",
+  pending_review: "Pending review", counted: "Counted", rejected: "Rejected",
 };
 
 export default function AdminPage() {
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
   const counts = {
     pending: items.filter(x => x.status === "pending_review").length,
-    approved: items.filter(x => x.status === "approved").length,
+    counted: items.filter(x => x.status === "counted").length,
     rejected: items.filter(x => x.status === "rejected").length,
   };
 
@@ -94,11 +94,11 @@ export default function AdminPage() {
       </section> : <>
         <section className="mb-6 grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-700 bg-[#1f293d] p-4"><p className="text-sm text-slate-400">Pending review</p><p className="mt-1 text-3xl font-bold">{counts.pending}</p></div>
-          <div className="rounded-xl border border-slate-700 bg-[#1f293d] p-4"><p className="text-sm text-slate-400">Approved</p><p className="mt-1 text-3xl font-bold">{counts.approved}</p></div>
+          <div className="rounded-xl border border-slate-700 bg-[#1f293d] p-4"><p className="text-sm text-slate-400">Counted</p><p className="mt-1 text-3xl font-bold">{counts.counted}</p></div>
           <div className="rounded-xl border border-slate-700 bg-[#1f293d] p-4"><p className="text-sm text-slate-400">Rejected</p><p className="mt-1 text-3xl font-bold">{counts.rejected}</p></div>
         </section>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">{[["pending_review","Pending"],["reviewed","Reviewed"],["approved","Approved"],["rejected","Rejected"],["all","All"]].map(([value,label])=><button key={value} onClick={()=>setFilter(value)} className={`rounded-full px-4 py-2 text-sm ${filter===value?"bg-emerald-400 font-bold text-[#0b0f19]":"border border-slate-600 text-slate-200"}`}>{label}</button>)}</div>
+          <div className="flex flex-wrap gap-2">{[["pending_review","Pending"],["counted","Counted"],["rejected","Rejected"],["all","All"]].map(([value,label])=><button key={value} onClick={()=>setFilter(value)} className={`rounded-full px-4 py-2 text-sm ${filter===value?"bg-emerald-400 font-bold text-[#0b0f19]":"border border-slate-600 text-slate-200"}`}>{label}</button>)}</div>
           <span className="text-sm text-slate-400">{visible.length} submission(s)</span>
         </div>
         {loading && <p className="py-8 text-center text-slate-300">Loading submissions…</p>}
@@ -113,9 +113,9 @@ export default function AdminPage() {
                 <p className="text-sm text-slate-300">@{participant?.x_username || "Unknown"} · {item.country_code}</p>
                 <p className="text-xs text-slate-500">{new Date(item.created_at).toLocaleString()} · {item.original_filename || "image"} · {(item.size_bytes/1024/1024).toFixed(2)} MB</p>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"approved")} className="rounded-lg bg-emerald-400 px-3 py-2 text-sm font-bold text-[#0b0f19] disabled:opacity-50">Approve</button>
+                  <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"counted")} className="rounded-lg bg-emerald-400 px-3 py-2 text-sm font-bold text-[#0b0f19] disabled:opacity-50">Count as vote</button>
                   <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"rejected")} className="rounded-lg bg-rose-500 px-3 py-2 text-sm font-bold text-white disabled:opacity-50">Reject</button>
-                  <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"reviewed")} className="rounded-lg border border-slate-500 px-3 py-2 text-sm disabled:opacity-50">Mark reviewed</button>
+                  
                   <button disabled={busyId===item.id} onClick={()=>void updateStatus(item.id,"pending_review")} className="rounded-lg border border-slate-500 px-3 py-2 text-sm disabled:opacity-50">Pending</button>
                 </div>
               </div>
