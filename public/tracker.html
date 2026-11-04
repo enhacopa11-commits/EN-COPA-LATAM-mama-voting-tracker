@@ -96,11 +96,11 @@
      <div class="mb-6 grid gap-4 sm:grid-cols-2">
       <div class="relative overflow-hidden rounded-2xl border border-[#34d39955] bg-gradient-to-br from-[#123b3c] via-[#17344a] to-[#172338] p-6 shadow-[0_18px_50px_#02081766]">
        <div class="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-[#6ee7b755]"></div><div class="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-[#6ee7b733]"></div>
-       <p class="eyebrow relative">TOTAL PROOFS COUNTED</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-total" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#34d39955] bg-[#0d4b3d99] px-3 py-1 text-[10px] font-bold tracking-widest text-[#6ee7b7]">LIVE</span></div><p class="relative mt-2 text-xs text-[#b7d5d8]">Pending and approved submissions</p>
+       <p class="eyebrow relative">TOTAL PROOFS COUNTED</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-total" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#34d39955] bg-[#0d4b3d99] px-3 py-1 text-[10px] font-bold tracking-widest text-[#6ee7b7]">LIVE</span></div><p class="relative mt-2 text-xs text-[#b7d5d8]">All uploaded images except those rejected by an admin</p>
       </div>
       <div class="relative overflow-hidden rounded-2xl border border-[#fbbf2455] bg-gradient-to-br from-[#49351e] via-[#332d35] to-[#172338] p-6 shadow-[0_18px_50px_#02081766]">
        <div class="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-[#fbbf2455]"></div><div class="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-[#fbbf2433]"></div>
-       <p class="eyebrow relative" style="color:#fbbf24">AWAITING REVIEW</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-pending" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#fbbf2455] bg-[#6b4a1c66] px-3 py-1 text-[10px] font-bold tracking-widest text-[#fcd34d]">PENDING</span></div><p class="relative mt-2 text-xs text-[#e5c99c]">Provisional points, subject to admin review</p>
+       <p class="eyebrow relative" style="color:#fbbf24">POSSIBLE DUPLICATES</p><div class="relative mt-3 flex items-end gap-3"><p id="ranking-pending" class="text-5xl font-extrabold tracking-tight text-white">—</p><span class="mb-1 rounded-full border border-[#fbbf2455] bg-[#6b4a1c66] px-3 py-1 text-[10px] font-bold tracking-widest text-[#fcd34d]">FLAGGED</span></div><p class="relative mt-2 text-xs text-[#e5c99c]">Possible duplicate images; all remain counted until rejected</p>
       </div>
      </div>
      <div class="grid gap-6 xl:grid-cols-2">
@@ -113,7 +113,7 @@
        <div class="table-wrap rounded-none border-0"><table style="min-width:300px"><tbody id="country-ranking"><tr><td>Loading…</td></tr></tbody></table></div>
       </article>
      </div>
-     <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#40546e] bg-[#111d2e] px-5 py-4"><p class="text-xs text-[#a9b9ca]"><span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#34D399]"></span>Provisional points count immediately and are removed if a proof is rejected.</p><p id="ranking-updated" class="text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p></div>
+     <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#40546e] bg-[#111d2e] px-5 py-4"><p class="text-xs text-[#a9b9ca]"><span class="mr-2 inline-block h-2 w-2 rounded-full bg-[#34D399]"></span>Each image counts immediately. Possible duplicates stay counted until an admin rejects that individual image.</p><p id="ranking-updated" class="text-xs text-[#9CA3AF]" aria-live="polite">Rankings update automatically after each submission.</p></div>
     </section>
     <section id="submit" class="mb-16">
      <div class="canva-card panel overflow-visible" style="background: rgb(31, 41, 61);">
@@ -123,7 +123,7 @@
         <h2 class="heading mb-4 leading-tight text-2xl font-bold text-white">SEND YOUR VOTING PROOF</h2>
         <p class="leading-relaxed text-[#c5cfdb]">Use this form to submit proof for any voting activity organized or supported by EN-COPA LATAM.</p>
         <div class="mt-7 rounded-xl border border-[#42647b] bg-[#142438] p-5 text-sm leading-relaxed text-[#cbd8e6]">
-         <strong>HOW IT WORKS</strong><br>1. Enter the voting campaign name.<br>2. Add your X username and country.<br>3. Upload your screenshots and submit.<br><br>Your images will be stored privately for the EN-COPA LATAM team to review. Submitting proof does not automatically mean it has been approved or counted.
+         <strong>HOW IT WORKS</strong><br>1. Enter the voting campaign name.<br>2. Add your X username and country.<br>3. Upload your screenshots and submit.<br><br>Each image counts as one vote as soon as it is uploaded. Possible duplicates are flagged for the team to review, but remain counted unless an admin rejects that specific image.
         </div>
         <p class="mt-6 text-xs leading-relaxed text-[#9CA3AF]"><strong>PRIVACY</strong><br>Your information and uploaded images are used only to organize and review EN-COPA LATAM voting submissions. Do not upload screenshots containing passwords, payment details, or other sensitive information.</p>
        </div>
@@ -296,6 +296,42 @@
   drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("dragging");});
   drop.addEventListener("dragleave",()=>drop.classList.remove("dragging"));
   drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("dragging");addFiles([...e.dataTransfer.files]);});
+  async function computePerceptualHash(file){
+    const bitmap=await createImageBitmap(file);
+    const canvas=document.createElement("canvas");canvas.width=32;canvas.height=32;
+    const ctx=canvas.getContext("2d",{willReadFrequently:true});
+    if(!ctx){bitmap.close();return "";}
+    ctx.drawImage(bitmap,0,0,32,32);bitmap.close();
+    const pixels=ctx.getImageData(0,0,32,32).data;
+    const gray=[];
+    for(let i=0;i<pixels.length;i+=4)gray.push(.299*pixels[i]+.587*pixels[i+1]+.114*pixels[i+2]);
+    const coeff=[];
+    for(let v=0;v<8;v++)for(let u=0;u<8;u++){
+      let sum=0;
+      for(let y=0;y<32;y++)for(let x=0;x<32;x++)
+        sum+=gray[y*32+x]*Math.cos((2*x+1)*u*Math.PI/64)*Math.cos((2*y+1)*v*Math.PI/64);
+      coeff.push(sum);
+    }
+    const sorted=coeff.slice(1).sort((a,b)=>a-b),median=sorted[Math.floor(sorted.length/2)];
+    let bits=coeff.map((value,index)=>index===0?0:value>median?1:0).join("");
+    return BigInt("0b"+bits).toString(16).padStart(16,"0");
+  }
+  let ocrWorkerPromise=null;
+  async function extractOcrText(file){
+    try{
+      if(!window.Tesseract){
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement("script");
+          script.src="https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js";
+          script.onload=resolve;script.onerror=reject;document.head.append(script);
+        });
+      }
+      if(!ocrWorkerPromise)ocrWorkerPromise=window.Tesseract.createWorker("eng+spa+por");
+      const worker=await ocrWorkerPromise;
+      const result=await worker.recognize(file);
+      return String(result.data.text||"").slice(0,12000);
+    }catch(error){console.warn("OCR skipped; hash matching will still work",error);return "";}
+  }
   async function compressImage(file){
     try{
       const bitmap=await createImageBitmap(file);
@@ -322,14 +358,16 @@
     try{
       for(let i=0;i<total;i++){
         const item=files[i];showMessage("Uploading image "+(i+1)+" of "+total+"…");
+        const [perceptualHash,ocrText]=await Promise.all([computePerceptualHash(item.file),extractOcrText(item.file)]);
         const uploadFile=await compressImage(item.file);
-        const body=new FormData();body.append("campaignName",campaign);body.append("username",username);body.append("countryCode",countryCode);body.append("screenshots",uploadFile,uploadFile.name);
-        try{const response=await fetch("/api/submissions",{method:"POST",body});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Upload failed");results.push({id:item.id,status:"saved"});}
+        const body=new FormData();body.append("campaignName",campaign);body.append("username",username);body.append("countryCode",countryCode);body.append("screenshots",uploadFile,uploadFile.name);body.append("perceptualHash",perceptualHash);body.append("ocrText",ocrText);
+        try{const response=await fetch("/api/submissions",{method:"POST",body});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Upload failed");results.push({id:item.id,status:"saved",duplicateFlag:!!payload.duplicateFlag});}
         catch(error){results.push({id:item.id,status:"failed",message:error instanceof Error?error.message:"Upload failed"});}
       }
       const saved=results.filter(x=>x.status==="saved").length;
       const failed=results.filter(x=>x.status!=="saved");
-      showMessage("Saved "+saved+" of "+total+" image(s)."+(failed.length?"\n"+failed.length+" image(s) could not be saved. Please try those again.":""));
+      const flagged=results.filter(x=>x.status==="saved"&&x.duplicateFlag).length;
+      showMessage(saved+" of "+total+" image(s) counted immediately."+ (flagged?" "+flagged+" possible duplicate(s) flagged for admin review; they remain counted.":"") +(failed.length?"\n"+failed.length+" image(s) could not be saved. Please try those again.":""));
       setStatus(saved===total?"Submitted successfully":saved?"Partially submitted":"Submission failed",saved?"success":"error");
       if(saved>0)await refreshRankings();
       const savedIds=new Set(results.filter(x=>x.status==="saved").map(x=>x.id));
@@ -349,7 +387,7 @@
       const data=await response.json();
       if(!response.ok)throw new Error(data.error||"Rankings unavailable");
       $("ranking-total").textContent=Number(data.total||0).toLocaleString();
-      $("ranking-pending").textContent=Number(data.provisional||0).toLocaleString();
+      $("ranking-pending").textContent=Number(data.duplicateFlags||0).toLocaleString();
       const individual=$("individual-ranking"),countries=$("country-ranking");
       individual.replaceChildren();countries.replaceChildren();
       (data.individual||[]).forEach(item=>{
